@@ -19,6 +19,10 @@ class Client:
     def add_wait_time(self, time):
         self.wait_time += time
 
+    def call(self):
+        # Use client age and sector to randomize call time and topic
+        call = callcenter.Call()
+
     @classmethod
     def gen_client(cls):
         """
