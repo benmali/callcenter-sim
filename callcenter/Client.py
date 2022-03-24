@@ -1,5 +1,6 @@
 import numpy as np
 import callcenter
+from helpers import Probabilities, TimeHelper
 
 
 class Client:
@@ -7,21 +8,34 @@ class Client:
     A class to represent a client
     """
 
-    def __init__(self, sector, age, call: callcenter.Call):
+    def __init__(self, sector, age):
         self.sector = sector
         self.age = age
         self.wait_time = 0
-        self.calls = []
+        self.call = None
+        self.chat = None
 
     def __repr__(self):
         return f"Client's arrival time is"
 
+    def _decide_contact_channel(self):
+        """
+        Private method for the Client to decide how to contact the call center - chat or a call
+        @return:
+        """
+
     def add_wait_time(self, time):
+        """
+        Add wait time for client to wait in queue
+        @param time:
+        @return:
+        """
         self.wait_time += time
 
-    def call(self):
+    def contact_call_center(self, current_time, ):
         # Use client age and sector to randomize call time and topic
-        call = callcenter.Call()
+        call_reason = "Where is my food"
+        call = callcenter.Call(current_time, call_reason,)
 
     @classmethod
     def gen_client(cls):

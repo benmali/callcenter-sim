@@ -9,8 +9,16 @@ class CallCenterSimulation:
         self.common_pool_scenario_no_pq = True  # Common pool without priority queue for restaurants
         self.common_pool_pq = False  # Common pool with priority queue for restaurants
         self.separated_pools = False  # Pool for restaurants and pool for clients
+        self.metrics = callcenter.Metrics()
+        self.n_end_clients = 1000
+        self.mode = "PriorityQueue"
+        # The day type (rainy w/e) is in charge of where is my food calls/chat
+        # Sector and age are in charge of reset my password/ login issues/ cant process my order cause of rules
 
-    def arriving(self, event):
+        # Assumptions - Where is my food call number rises on rainy days -> and are direct derivitive of total number of end clients
+        # Login/password/order process calls are unrelated to weather (no correlation)
+
+    def incoming_call(self, event):
         """
         arriving call/chat message
         :param event: Event object
@@ -19,22 +27,59 @@ class CallCenterSimulation:
         client = event.client
         current_floor = client.current_floor  # current floor number, use as index to access floor list
         # search for elevator in this floor
-        if not self.saturday:
-            for elevator in self.elevators:
-                # there is an Elevator in the desired floor with closed doors, open doors
-                if not elevator.start:
-                    if elevator.floor == current_floor and not elevator.doors_open and client.desired_floor in elevator.service_floors:
-                        elevator.start = True  # elevator won't open while moving
-                        hpq.heappush(self.events,
-                                     Event(client.arrival_time, "door open", current_floor, elevator.number))
-                        break  # open just one Elevator
-            if client.need_swap:  # add current and target floors to queue
-                self.order_elevator(current_floor, "down", 0)
-            else:  # client doesn't need swap
-                direction = None  # if client arrived to a floor with an open elevator, do nothing
-                if client.current_floor > client.desired_floor:
-                    direction = "down"
-                elif client.current_floor < client.desired_floor:
-                    direction = "up"
-                self.order_elevator(current_floor, direction, client.desired_floor)
-        # don't do anything if it's Saturday elevators
+
+        hpq.heappush(self.events, callcenter.Event(client.arrival_time, callcenter.Client))
+
+    def new_company_joined(self, num_employees) -> None:
+        """
+        Case when a new company joins the service
+        @param num_employees: number of new employees from the new company
+        @return: None
+        """
+        self.n_end_clients += num_employees
+
+    def incoming_chat(self):
+        # Randomize handling time, push to event finish chat
+        # Add to Metrics handling time
+        pass
+
+    def agent_break(self):
+        pass
+        # Which agent
+        # Randomize break time, push return to event list
+
+    def run(self):
+
+        for i in range(100):
+            np.random.seed(i+1)
+            self.reset_simulation(self.saturday)
+            client = self.gen_client()
+            hpq.heappush(self.events, Event(client.arrival_time, "arriving", None, None, client))
+            if self.saturday:
+                for elevator in self.elevators:
+                    hpq.heappush(self.events, Event(self.curr_time, "door open", elevator.floor, elevator.number))
+            while self.curr_time < self.simulation_time:
+                event = hpq.heappop(self.events)
+                self.curr_time = event.time
+                if event.event_type == "arriving":
+                    self.arriving(event)
+                elif event.event_type == "door open":
+                    self.door_open(event)
+                elif event.event_type == "elevator fix":
+                    self.elevator_fix(event)
+                elif event.event_type == "door close":
+                    self.door_close(event)
+            for floor in self.floors:
+                for client in floor.line:
+                    if (self.curr_time - client.arrival_time) > 15 * 60 and not client.got_service:
+                        self.abandoned += 1
+            avg_cap = list(map(lambda x: x / (self.curr_time - 21600), self.elevators_avg_cap))
+            self.abandoned_lst.append(self.abandoned)
+            for key, value in self.service_dist.items():
+                self.service_times[key] += value
+            for j in range(len(avg_cap)):
+                self.elevator_mat[i][j] = avg_cap[j]
+
+
+
+
