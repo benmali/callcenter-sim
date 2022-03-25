@@ -1,5 +1,3 @@
-import callcenter
-
 
 class Call:
     def __init__(self, call_time, call_reason, call_date, from_rest: bool = False, total_time: float = 0):
@@ -18,7 +16,7 @@ class Call:
         self.destination = None
         self.from_rest = from_rest  # This will be used to create a priority queue
 
-    def __lt__(self, other: callcenter.Call):
+    def __lt__(self, other):
         """
         Sort call order - call that arrived first will be answered first
         """
