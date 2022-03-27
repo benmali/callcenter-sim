@@ -1,5 +1,5 @@
 
-from callcenter import Restaurant
+from callcenter.Restaurant import Restaurant
 
 
 class Queue:
@@ -62,7 +62,7 @@ class Queue:
         Client can be restaurant as well
         """
         if self.mode in ('PriorityQueue', 'SeparatePool'):
-            if isinstance(client, object.Restaurant):
+            if isinstance(client, Restaurant):
                 self.restaurants.append(client)
             else:
                 self.clients.append(client)

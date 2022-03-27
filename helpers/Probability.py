@@ -4,7 +4,12 @@
 # Special Events
 # CustomerAgent break hours
 # Distribution of call time - if client is over 50 or blue collar assume call takes longer
+
+# What is the company signing rate (how often we have a signing?- distribution?)
+# We assume a company signing is unrelated to other companies signing
 import datetime
+import numpy as np
+import randomname
 
 
 class Probabilities:
@@ -15,6 +20,72 @@ class Probabilities:
         self.time_of_day = time_of_day
         self.date = date
         self.is_holiday = is_holiday
+
+    def company_sign_rate(self):
+        """
+        Set the rate of company signing (once a month, twice a month.. etc)
+        @return:
+        """
+
+    @staticmethod
+    def create_random_rest_name():
+        name = randomname.get_name()
+        return name
+
+    @staticmethod
+    def company_size_and_sector_distribution():
+        """
+        Company size is correlated with company sector
+        Chance to be high tech company is 70%
+        Given the number, randomize a sector
+        Chance to be small, medium, big, corporate = 0.6 (x <50 ), 0.25 ( 50< x < 500) 0.10 ( 500< x< 1000) 0.04 (x>1000)
+        0.01 government
+        You can change this probability to reflect the real chance for  a company signing
+        We assume a company signing is unrelated to other companies signing
+        @return:
+        """
+
+        probability = np.random.uniform()
+        if probability <= 0.5:
+            n_employees = np.random.uniform(10, 50)  # Number of employees for a small company
+        elif 0.5 < probability < 0.85:
+            n_employees = np.random.uniform(50, 500)
+        elif 0.85 < probability < 0.95:
+            n_employees = np.random.uniform(500, 1000)
+
+        elif 0.95 < probability < 0.99:
+            n_employees = np.random.uniform(1000, 1500)
+        else:
+            n_employees = np.random.uniform(1500, 50000)  # Government, few global companies
+
+        probability = np.random.uniform()  # Define a dependent probability for sector
+        if 10 <= n_employees <= 50:
+            if probability < 0.2:
+                sector = "Blue-Collar"
+            else:
+                sector = "High-Tech"
+        elif 50 < n_employees <= 500:
+            if probability < 0.5:
+                sector = "Blue-Collar"
+            else:
+                sector = "High-Tech"
+        elif 500 < n_employees <= 1000:
+            if probability < 0.3:
+                sector = "Blue-Collar"
+            else:
+                sector = "High-Tech"
+        elif 1000 < n_employees <= 1500:
+            if probability < 0.15:
+                sector = "Blue-Collar"
+            else:
+                sector = "High-Tech"
+        else:
+            if probability < 0.9:  # Not many high tech companies that size, most likely government companies
+                sector = "Blue-Collar"
+            else:
+                sector = "High-Tech"
+        return n_employees, sector
+
 
     def contact_probabilities(self, client):
         """
@@ -27,7 +98,7 @@ class Probabilities:
         # Given we have a rainy day -> more calls for orders -> more where is my food (otherwise people just walk)
         # Given a sector and age -> reset my password/login issues
         sectors = {'blue-collar': (0.75, 0.25),
-                   'high-tech':()}
+                   'high-tech': ()}
 
         if client.sector == '':
             pass
@@ -55,7 +126,8 @@ class Probabilities:
 
 
 if __name__ == "__main__":
-    my_date = datetime.datetime(2019, 12, 12)
-    ps = Probabilities("16", my_date)
-    print(ps.weather_probabilities())
+    # my_date = datetime.datetime(2019, 12, 12)
+    # ps = Probabilities("16", my_date)
+    # print(ps.weather_probabilities())
+    print(Probabilities.create_random_rest_name())
 

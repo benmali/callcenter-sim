@@ -1,5 +1,5 @@
 import numpy as np
-import callcenter
+from callcenter import Call
 from helpers import Probabilities, TimeHelper
 
 
@@ -35,10 +35,24 @@ class Client:
     def contact_call_center(self, current_time, ):
         # Use client age and sector to randomize call time and topic
         call_reason = "Where is my food"
-        call = callcenter.Call(current_time, call_reason,)
+        call = Call(current_time, call_reason, "1")
 
-    @classmethod
-    def gen_client(cls):
+    def where_is_my_food(self):
+        pass
+
+    def forgot_password(self):
+        """
+        If client forgot password (some prob)
+        use distribution for call or a chat
+        @return:
+        """
+        pass
+
+    def login_issues(self):
+        pass
+
+    @staticmethod
+    def gen_client():
         """
         generates Client object with arrival time, desired floor, and current floor
         :return: Client object

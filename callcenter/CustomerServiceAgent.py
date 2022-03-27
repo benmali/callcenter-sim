@@ -28,14 +28,14 @@ class CustomerServiceAgent:
         self.on_break = False
         self.office_duty_break = False
 
-    def answer_call(self):
+    def answer_call(self, call):
         pass
         self.is_free = False
         # Pull call from queue
         # Calculate call time (randomize)
         # Push to heap being free
 
-    def answer_chat(self):
+    def answer_chat(self, chat):
         pass
         self.is_free = False
         # Pull chat from queue

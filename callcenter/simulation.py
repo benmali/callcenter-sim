@@ -1,6 +1,7 @@
 import numpy as np
 import heapq as hpq
 import callcenter
+from helpers import Probabilities
 
 
 class CallCenterSimulation:
@@ -11,6 +12,8 @@ class CallCenterSimulation:
         self.separated_pools = False  # Pool for restaurants and pool for clients
         self.metrics = callcenter.Metrics()
         self.n_end_clients = 1000
+        self.n_employees_by_sector = {"High-Tech": 0, "Blue-Collar": 0}  # Map the number of employees by sector
+        self.companies = []  # This list only grows along iteration
         self.mode = "PriorityQueue"
         # The day type (rainy w/e) is in charge of where is my food calls/chat
         # Sector and age are in charge of reset my password/ login issues/ cant process my order cause of rules
@@ -30,17 +33,19 @@ class CallCenterSimulation:
 
         hpq.heappush(self.events, callcenter.Event(client.arrival_time, callcenter.Client))
 
-    def new_company_joined(self, num_employees) -> None:
-        """
-        Case when a new company joins the service
-        @param num_employees: number of new employees from the new company
-        @return: None
-        """
-        self.n_end_clients += num_employees
-
     def incoming_chat(self):
         # Randomize handling time, push to event finish chat
         # Add to Metrics handling time
+        pass
+
+    def sign_new_company(self):
+        n_employees, sector = Probabilities.company_size_and_sector_distribution()
+
+        self.n_end_clients += 1
+        # Generate random number of employees, sector and number of employees
+        # Add the number of new employees to total pool
+
+    def sign_new_restaurant(self):
         pass
 
     def agent_break(self):
@@ -50,9 +55,8 @@ class CallCenterSimulation:
 
     def run(self):
 
-        for i in range(100):
+        for i in range(365):  # Iterate over a year of events
             np.random.seed(i+1)
-            self.reset_simulation(self.saturday)
             client = self.gen_client()
             hpq.heappush(self.events, Event(client.arrival_time, "arriving", None, None, client))
             if self.saturday:
