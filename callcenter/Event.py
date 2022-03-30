@@ -1,11 +1,12 @@
 class Event:
-    def __init__(self, time, event_type):
+    def __init__(self, time, event_type, client=None):
         """
         :param time: system time
         :param event_type: event types
         """
         self.time = time
         self.event_type = event_type
+        self.client = client
 
     def __lt__(self, other):
         return self.time < other.time

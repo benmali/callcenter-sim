@@ -16,16 +16,30 @@ class Probabilities:
     """
     Given specific parameters, return a probability for an event to occur
     """
+
     def __init__(self, time_of_day, date: datetime.datetime, is_holiday=False):
         self.time_of_day = time_of_day
         self.date = date
         self.is_holiday = is_holiday
 
-    def company_sign_rate(self):
+    @staticmethod
+    def company_sign_rate() -> int:
         """
         Set the rate of company signing (once a month, twice a month.. etc)
+        The number of days to next company sign
+        (This should be some poisson distribution)
         @return:
         """
+        return np.random.randint(60, 120)
+
+    @staticmethod
+    def restaurant_sign_rate() -> int:
+        """
+        Set the rate of which restaurants are added to the service
+        (This should be some poisson distribution)
+        @return:
+        """
+        return np.random.randint(60, 120)
 
     @staticmethod
     def create_random_rest_name():
@@ -86,7 +100,6 @@ class Probabilities:
                 sector = "High-Tech"
         return n_employees, sector
 
-
     def contact_probabilities(self, client):
         """
         If we decided that the client will contact the call center, decide how
@@ -102,6 +115,19 @@ class Probabilities:
 
         if client.sector == '':
             pass
+
+
+    def call_duration(self, client) -> float:
+        """
+        Depending on the client, randomize a call duration
+        Assume call duration for blue collar will be longer
+        @param client:
+        @return:
+        """
+        if client.sector == 'Blue-Collar':
+            return 5.13
+        else:
+            return 3.0
 
     def weather_probabilities(self):
         """
@@ -130,4 +156,3 @@ if __name__ == "__main__":
     # ps = Probabilities("16", my_date)
     # print(ps.weather_probabilities())
     print(Probabilities.create_random_rest_name())
-
