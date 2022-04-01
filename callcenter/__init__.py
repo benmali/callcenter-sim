@@ -7,5 +7,5 @@ from .ChatQueue import ChatQueue
 from .Queue import Queue
 from .Metrics import Metrics
 from .Event import Event
-from .CallCenter import CallCenter
+from .CallCenterSimulation import CallCenterSimulation
 # from .Day import Day

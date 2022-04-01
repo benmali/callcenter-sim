@@ -116,8 +116,49 @@ class Probabilities:
         if client.sector == '':
             pass
 
+    @staticmethod
+    def call_rate(curr_hour: datetime.datetime):
+        """
+        Return the time between calls depending on the hour of the day
+        @param curr_hour:
+        @return:
+        """
+        if curr_hour.hour < 11:
+            return np.random.exponential(1 / 100)
+        elif 11 <= curr_hour.hour <= 14:
+            return np.random.exponential(1/60)
+        else:
+            return np.random.exponential(1 / 120)
 
-    def call_duration(self, client) -> float:
+    @staticmethod
+    def chat_rate(curr_hour: datetime.datetime):
+        """
+        Return the time between chats depending on the hour of the day
+        @param curr_hour:
+        @return:
+        """
+        if curr_hour.hour < 11:
+            return np.random.exponential(1 / 100)
+        elif 11 <= curr_hour.hour <= 14:
+            return np.random.exponential(1/60)
+        else:
+            return np.random.exponential(1 / 120)
+
+    @staticmethod
+    def call_duration(client) -> float:
+        """
+        Depending on the client, randomize a call duration
+        Assume call duration for blue collar will be longer
+        @param client:
+        @return:
+        """
+        if client.sector == 'Blue-Collar':
+            return 5.13
+        else:
+            return 3.0
+
+    @staticmethod
+    def chat_duration(client) -> float:
         """
         Depending on the client, randomize a call duration
         Assume call duration for blue collar will be longer
