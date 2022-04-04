@@ -2,10 +2,10 @@ from helpers.Probability import Probabilities
 
 
 class Restaurant:
-    def __init__(self,  location):
+    def __init__(self,  arrival_time):
         self.name = Probabilities.create_random_rest_name()
-        self.location = location
-        self.calls = []
+        self.arrival_time = arrival_time
+        self.wait_time = 0
 
     def __repr__(self):
         return self.name

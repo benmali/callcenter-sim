@@ -140,7 +140,7 @@ class Probabilities:
         if curr_hour.hour < 11:
             return np.random.exponential(1 / 100)
         elif 11 <= curr_hour.hour <= 14:
-            return np.random.exponential(1/60)
+            return np.random.exponential(1 / 60)
         else:
             return np.random.exponential(1 / 120)
 
@@ -149,26 +149,47 @@ class Probabilities:
         """
         Depending on the client, randomize a call duration
         Assume call duration for blue collar will be longer
+        Can add contact reason here
         @param client:
         @return:
         """
         if client.sector == 'Blue-Collar':
-            return 5.13
+
+            return np.random.uniform(2, 5) * 60  # Greater variance for blue collar
         else:
-            return 3.0
+            return np.random.uniform(2, 3) * 60
 
     @staticmethod
     def chat_duration(client) -> float:
         """
         Depending on the client, randomize a call duration
         Assume call duration for blue collar will be longer
+        Can add contact reason here
         @param client:
         @return:
         """
         if client.sector == 'Blue-Collar':
-            return 5.13
+            return np.random.uniform(5, 13) * 60
         else:
-            return 3.0
+            return np.random.uniform(3, 10) * 60
+
+    @staticmethod
+    def agent_short_break():
+        """
+        Randomize if an agent wants a short break
+        @return:
+        """
+        probability = np.random.uniform(0, 1)
+        return probability < 0.1
+
+    @staticmethod
+    def agent_long_break():
+        """
+        Randomize if an agent wants a short break
+        @return:
+        """
+        probability = np.random.uniform(0, 1)
+        return probability < 0.06
 
     def weather_probabilities(self):
         """
