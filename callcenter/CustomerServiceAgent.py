@@ -83,7 +83,6 @@ class CustomerServiceAgent:
             self.is_free = False
         chat_time = Probabilities.chat_duration(client)
         return chat_time
-        # Push to heap being free
 
     def answer_call(self, client):
         """
@@ -121,7 +120,7 @@ class CustomerServiceAgent:
                 self.n_long_breaks += 1
                 self.on_break = True
                 self.wants_break = False
-                break_time = 5.0 * 60 # Randomize this
+                break_time = 5.0 * 60  # Randomize this
                 return break_time  # return break time
         else:
             return 0  # No break

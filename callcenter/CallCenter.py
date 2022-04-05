@@ -27,7 +27,7 @@ class CallCenter:
         self.curr_date_time = None
         self.closing_hour = '20:00'
         self.n_restaurants = 1_000
-        self.curr_time = None  # This needs to be the curr time and the curr date
+        self.curr_time = 0  # This needs to be the curr time and the curr date
         self.mode = mode  # PriorityQueue, SeparatePool, Regular
         self.call_load_ratio = None  # queue size / number of agents assigned to calls
         self.chat_load_ratio = None  # queue size / number of agents assigned to chats
@@ -53,10 +53,10 @@ class CallCenter:
         self.companies = []  # This list only grows along iteration
         self.event_mapping = {
             'incoming_call_or_chat': self.incoming_call_or_chat,
-            'end_call': self.end_call,
-            'end_chat': self.end_chat,
+            'end_call_or_chat': self.end_call_or_chat,
             'sign_new_company': self.sign_new_company,
             'sign_new_restaurant': self.sign_new_restaurant,
+            'end_agent_break': self.end_agent_break
         }
 
     def incoming_call_or_chat(self, event):
@@ -113,11 +113,11 @@ class CallCenter:
         # Generate new chats and call arrivals
         next_call_time = client.arrival_time + Probabilities.call_rate(client.arrival_time)
         hpq.heappush(self.events,
-                     callcenter.Event(next_call_time, 'incoming_call_or_chat', callcenter.Client()))  # Push new arrival
+                     callcenter.Event(next_call_time, 'incoming_call_or_chat', callcenter.Client(next_call_time)))  # Push new arrival
 
         next_chat_time = client.arrival_time + Probabilities.chat_rate(client.arrival_time)
         hpq.heappush(self.events,
-                     callcenter.Event(next_chat_time, 'incoming_call_or_chat', callcenter.Client()))  # Push new arrival
+                     callcenter.Event(next_chat_time, 'incoming_call_or_chat', callcenter.Client(next_chat_time)))  # Push new arrival
 
     def end_call_or_chat(self, event):
         agent = event.agent
@@ -219,22 +219,15 @@ class CallCenter:
         for i in range(365):  # Iterate over a year of events
             np.random.seed(i + 1)
             self.sign_new_company()
-            client = self.gen_client()
+            client = callcenter.Client(0)
             hpq.heappush(self.events, callcenter.Event(client.arrival_time, "incoming_call", client))
-
-            while self.curr_hour < self.closing_hour:
+            while self.curr_time < self.closing_hour:
                 event = hpq.heappop(self.events)
                 self.curr_time = event.time
                 handle_event = self.event_mapping.get(event.event_type)
                 handle_event(event)
 
-        self.simulation = callcenter.CallCenterSimulation
-        self.metrics = Metrics()  # Metrics to measure the call center performance
-        self.mode = mode
-        self.starting_number_of_agents = number_of_agents
-        self.call_queue = CallQueue(self.mode)
-        self.chat_queue = ChatQueue(self.mode)
-
 
 if __name__ == "__main__":
-    pass
+    cc = CallCenter()
+    cc.run()
