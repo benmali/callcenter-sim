@@ -124,11 +124,11 @@ class Probabilities:
         @return:
         """
         if curr_hour.hour < 11:
-            return np.random.exponential(1 / 100)
+            return 1 / np.random.exponential(1 / 5000)
         elif 11 <= curr_hour.hour <= 14:
-            return np.random.exponential(1/60)
+            return 1 / np.random.exponential(1 / 1000)
         else:
-            return np.random.exponential(1 / 120)
+            return 1 / np.random.exponential(1 / 3500)
 
     @staticmethod
     def chat_rate(curr_hour: datetime.datetime):
@@ -138,11 +138,11 @@ class Probabilities:
         @return:
         """
         if curr_hour.hour < 11:
-            return np.random.exponential(1 / 100)
+            return 1 / np.random.exponential(1 / 10000)
         elif 11 <= curr_hour.hour <= 14:
-            return np.random.exponential(1 / 60)
+            return 1 / np.random.exponential(1 / 3000)
         else:
-            return np.random.exponential(1 / 120)
+            return 1 / np.random.exponential(1 / 450)
 
     @staticmethod
     def call_duration(client) -> float:
@@ -217,4 +217,5 @@ if __name__ == "__main__":
     # my_date = datetime.datetime(2019, 12, 12)
     # ps = Probabilities("16", my_date)
     # print(ps.weather_probabilities())
-    print(Probabilities.create_random_rest_name())
+    print(1 / np.random.exponential(1 / 2000))  # bigger gap
+    print(1 / np.random.exponential(1 / 50))  # smaller gap

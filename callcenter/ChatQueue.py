@@ -1,4 +1,4 @@
-from callcenter.Queue import Queue
+from callcenter.ClientQueue import Queue
 
 
 class ChatQueue(Queue):

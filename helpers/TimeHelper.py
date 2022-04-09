@@ -29,14 +29,26 @@ class TimeHelper:
         @param date:
         @return:
         """
-        return datetime.datetime.strptime(date, '%d-%m-%y')
-
+        return datetime.datetime.strptime(date, '%d-%m-%Y')
 
     @staticmethod
-    def get_date_isr_format(date: datetime.datetime) -> str:
+    def string_to_hour(hour: str) -> datetime.datetime:
         """
-        Get the desired date in Israeli time format
-        @param date:
+        Convert string to datetime object
+        @param hour:
         @return:
         """
-        pass
+        return datetime.datetime.strptime(hour, '%H:%M:%S')
+
+    @staticmethod
+    def string__to_full_time(date: str) -> datetime:
+        return datetime.datetime.strptime(date, '%d-%m-%Y %H:%M:%S')
+
+    @staticmethod
+    def set_next_day(date: datetime.datetime) -> datetime.datetime:
+        month = date.month
+        day = date.day
+        year = date.year
+
+        return datetime.datetime.strptime(f'{day}-{month}-{year} 08:00:00', '%d-%m-%Y %H:%M:%S') + \
+               datetime.timedelta(days=1)

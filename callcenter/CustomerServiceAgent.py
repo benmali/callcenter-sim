@@ -12,13 +12,16 @@ class CustomerServiceAgent:
         self.on_break = False
         self.office_duty_break = False
         self.task_assigned = task_assigned
-        self.is_free = False
+        self.is_free = True
         self.wants_break = False  # Flag to stop routing calls or chats to agent
         self.n_short_breaks = 0  # Allowed number of breaks is 3 breaks of up to 3 min
         self.n_long_breaks = 0  # Allowed number of breaks is 1 break of up to 10 min
         self.max_short_breaks = 3
         self.max_long_breaks = 1
         self.lunch_break = 0  # Allowed number of breaks is 1 break of up to 45 min
+
+    def __repr__(self):
+        return f"Agent {self.agent_id}-task {self.task_assigned} free? {self.is_free}"
 
     def __hash__(self):
         """

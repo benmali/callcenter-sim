@@ -10,6 +10,13 @@ class Queue:
         self.queue_map = {'clients': self.clients,
                           'restaurants': self.restaurants}
 
+    def is_empty(self) -> bool:
+        """
+        Assert is queue is empty
+        @return: bool
+        """
+        return len(self.clients) == 0
+
     def _pull_priority(self):
         """
         Pull method for priority queue
@@ -17,7 +24,7 @@ class Queue:
         if self.restaurants:  # Queue not empty
             client = self.restaurants.pop(0)  # Pull first restaurant from the queue and remove from list
         else:
-            client = self.restaurants.pop(0)
+            client = self.clients.pop(0)
         return client
 
     def _pull_separate(self, queue: str):
