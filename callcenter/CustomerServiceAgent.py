@@ -120,19 +120,15 @@ class CustomerServiceAgent:
         """
         if self.task_assigned == 'call':
             self.call -= 1
+            if self.call < self.max_simultaneous_calls:
+                self.is_free = True
         else:
             self.chats -= 1
+            if self.chats < self.max_simultaneous_chats:
+                self.is_free = True
         wants_short_break = Probabilities.agent_short_break()
         wants_long_break = Probabilities.agent_long_break()
-        if wants_short_break:
-            if self.call == 0 and self.chats == 0 and self.n_short_breaks < self.max_short_breaks:
-                self.n_short_breaks += 1
-                self.on_break = True
-                self.wants_break = False
-                break_time = 2.0 * 60  # Randomize this
-                return break_time  # return break time
-
-        elif wants_long_break:
+        if wants_long_break:
             if self.call == 0 and self.chats == 0 and self.n_long_breaks < self.max_long_breaks:
                 self.n_long_breaks += 1
                 self.on_break = True
@@ -140,12 +136,18 @@ class CustomerServiceAgent:
                 break_time = 5.0 * 60  # Randomize this
                 return break_time  # return break time
 
-        else:  # No break, set agent as free
-            if self.task_assigned == 'call':
-                self.is_free = True
-            elif self.task_assigned == 'chat' and self.chats == 0:
-                self.is_free = True
-            return 0  # No break
+            return 0  # Agent wants a break, but exceeded the breaks limit
+
+        elif wants_short_break:
+            if self.call == 0 and self.chats == 0 and self.n_short_breaks < self.max_short_breaks:
+                self.n_short_breaks += 1
+                self.on_break = True
+                self.wants_break = False
+                break_time = 2.0 * 60  # Randomize this
+                return break_time  # return break time
+            return 0  # Agent wants a break, but exceeded the breaks limit
+
+        return 0  # No break
 
         # set terms for breaks
         # Probability to take a break

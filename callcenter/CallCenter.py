@@ -143,16 +143,18 @@ class CallCenter:
         """
         agent = event.agent
         break_time = agent.end_call_or_chat()
-        print(f"Ending {agent.task_assigned} for {agent} - break? {break_time}")
+        print(f"Ending {agent.task_assigned} for Agent {agent.agent_id} - break? {break_time} at {self.curr_time}")
         if break_time:
             logger.debug(f"Agent {agent} is going for a break for {break_time // 60 } minutes at {self.curr_time}")
             hpq.heappush(self.events,
                          callcenter.Event(self.curr_time + datetime.timedelta(seconds=break_time), 'end_agent_break',
                                           None, agent))  # Push new arrival
+
+        # Agent is not going for a break
         else:
-            logger.debug(f"{agent} {agent.task_assigned} end - pull another client {self.curr_time}")
             queue = agent.task_assigned  # assigned to call or chat
             if not self.queue_map[queue].is_empty():  # Pull another client if queue isn't empty
+                logger.debug(f"{agent} {agent.task_assigned} end - pull another client {self.curr_time}")
                 client = self.queue_map[queue].dequeue(queue)
                 agent.handle_client(client)
                 call_duration = Probabilities.call_duration(client)
@@ -162,8 +164,7 @@ class CallCenter:
                                               'end_call_or_chat',
                                               client, agent))  # Push new arrival
             else:
-                # Agent has no new calls or chats to pull set him as free
-                agent.is_free = True
+                logger.debug(f"{agent} empty queue at {self.curr_time}")
 
     def end_agent_break(self, event) -> None:
         """
