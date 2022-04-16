@@ -1,10 +1,17 @@
 from helpers import Probabilities
+import datetime
+from callcenter import Client
 
 
 class CustomerServiceAgent:
-    def __init__(self, agent_id, task_assigned='call'):
+    def __init__(self, agent_id, queue: "Queue", system_time: datetime.datetime):
         self.seniority = 0
         self.agent_id = agent_id
+        self.queue = queue  # queue object injected from CallCenter object
+        if self.queue.queue_type == 'call':
+            task_assigned = 'call'
+        else:
+            task_assigned = 'chat'
         self.call = 0  # Holds the number of calls the agent is executing, maximum of 1 call
         self.chats = 0  # Holds the number of calls the agent is executing, maximum of 1 call
         self.max_simultaneous_chats = 3
@@ -21,7 +28,7 @@ class CustomerServiceAgent:
         self.lunch_break = 0  # Allowed number of breaks is 1 break of up to 45 min
 
     def __repr__(self):
-        return f"Agent {self.agent_id}-task {self.task_assigned} free? {self.is_free}"
+        return f"Agent: {self.agent_id} / Task: {self.task_assigned} / free?: {self.is_free} /"
 
     def __hash__(self):
         """
@@ -74,7 +81,7 @@ class CustomerServiceAgent:
         """
         return self.task_assigned == 'call' and self.call < self.max_simultaneous_calls and self.is_free and not self.wants_break
 
-    def answer_chat(self, client):
+    def answer_chat(self, client) -> float:
         """
         Agent answers chat
         Allow up to 3
@@ -87,7 +94,14 @@ class CustomerServiceAgent:
         chat_time = Probabilities.chat_duration(client)
         return chat_time
 
-    def answer_call(self, client):
+
+    def handle_client(self, client):
+        if self.task_assigned == "chat":
+            return self.answer_chat(client)
+        else:
+            return self.answer_call(client)
+
+    def answer_call(self, client) -> float:
         """
         Agent answers call (currently allows 1 simultaneous calls, but that can be changed)
         @param client:
@@ -125,7 +139,12 @@ class CustomerServiceAgent:
                 self.wants_break = False
                 break_time = 5.0 * 60  # Randomize this
                 return break_time  # return break time
-        else:
+
+        else:  # No break, set agent as free
+            if self.task_assigned == 'call':
+                self.is_free = True
+            elif self.task_assigned == 'chat' and self.chats == 0:
+                self.is_free = True
             return 0  # No break
 
         # set terms for breaks

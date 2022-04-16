@@ -1,6 +1,7 @@
 import numpy as np
 import math
 from helpers import Probabilities, TimeHelper
+import datetime
 
 
 class Client:
@@ -31,3 +32,19 @@ class Client:
 
     def __repr__(self):
         return f"Client's Arrival: {self.arrival_time}, Method: {self.contact_method}, Reason: {self.contact_reason}"
+
+    def set_wait_time(self, start_service_time: datetime.datetime):
+        """
+        Update client's total waiting time when he starts to get service
+        @param start_service_time:
+        @return:
+        """
+        self.wait_time = start_service_time - self.arrival_time
+
+    def set_service_time(self, service_time: float):
+        """
+        Set service time for client
+        @param service_time:
+        @return:
+        """
+        self.service_time = service_time

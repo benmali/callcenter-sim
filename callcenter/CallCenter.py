@@ -30,7 +30,6 @@ logger = logging.getLogger('CallCenter')
 
 class CallCenter:
     def __init__(self, mode: str = "PriorityQueue", number_of_agents: int = 10):
-
         self.events = []
         self.curr_time = TimeHelper.string__to_full_time('01-01-2021 08:00:00')
         self.opening_hour = TimeHelper.string_to_hour('08:00:00')
@@ -49,11 +48,11 @@ class CallCenter:
                 self.starting_number_of_agents * percentage_of_rest_agents)  # At least 1 agent
             self.n_end_client_agents = self.starting_number_of_agents - self.n_rest_agents  # Other agents serve clients
             # i % 2 condition splits half the agents for chat duty other half for calls
-            self.end_service_agents = [CustomerServiceAgent(i, 'call' if i % 2 == 0 else 'chat') for i in range(self.n_end_client_agents)]
-            self.rest_service_agents = [CustomerServiceAgent(i) for i in range(self.n_rest_agents)]
-        else:
+            self.end_service_agents = [CustomerServiceAgent(i, self.call_queue if i % 2 == 0 else self.chat_queue, self.curr_time) for i in range(self.n_end_client_agents)]
+            self.rest_service_agents = [CustomerServiceAgent(i, self.call_queue, self.curr_time) for i in range(self.n_rest_agents)]
+        else:  # Regular and PriorityQueue
             # i % 2 condition splits half the agents for chat duty other half for calls
-            self.service_agents = [CustomerServiceAgent(i, 'call' if i % 2 == 0 else 'chat') for i in range(self.starting_number_of_agents)]
+            self.service_agents = [CustomerServiceAgent(i, self.call_queue if i % 2 == 0 else self.chat_queue, self.curr_time) for i in range(self.starting_number_of_agents)]
 
         self.n_end_clients = 100_0000
         self.n_employees_by_sector = {"High-Tech": 800_000,
@@ -66,6 +65,7 @@ class CallCenter:
             'sign_new_restaurant': self.sign_new_restaurant,
             'end_agent_break': self.end_agent_break
         }
+        self.queue_map = {"call": self.call_queue, "chat": self.chat_queue}
 
     def incoming_call_or_chat(self, event):
         """
@@ -102,8 +102,10 @@ class CallCenter:
                 if agent.is_free_for_call():
                     client = self.dequeue_call(queue)
                     agent.answer_call(client)
+                    logger.info(f"{agent} handling {agent.task_assigned} from {client}")
                     call_duration = Probabilities.call_duration(client)
-                    client.service_time = call_duration  # Update call duration
+                    client.set_wait_time(self.curr_time)
+                    client.set_service_time(call_duration)  # Update call duration
                     hpq.heappush(self.events,
                                  callcenter.Event(self.curr_time + datetime.timedelta(seconds=call_duration),
                                                   'end_call_or_chat',
@@ -114,13 +116,15 @@ class CallCenter:
                 if agent.is_free_for_chat():
                     client = self.dequeue_chat(queue)
                     agent.answer_chat(client)
+                    logger.info(f"{agent} handling {agent.task_assigned} from {client}")
                     chat_duration = Probabilities.chat_duration(client)
-                    client.service_time = chat_duration  # Update chat duration
+                    client.set_wait_time(self.curr_time)
+                    client.set_service_time(chat_duration)  # Update call duration
                     hpq.heappush(self.events,
                                  callcenter.Event(self.curr_time + datetime.timedelta(seconds=chat_duration),
                                                   'end_call_or_chat',
                                                   client, agent))  # Push new arrival
-                    break # Agent is assigned for the call, exit loop
+                    break  # Agent is assigned for the call, exit loop
 
         # Generate new chats and call arrivals
         next_call_time = client.arrival_time + datetime.timedelta(seconds=Probabilities.call_rate(client.arrival_time))
@@ -139,12 +143,27 @@ class CallCenter:
         """
         agent = event.agent
         break_time = agent.end_call_or_chat()
-        print(f"Ending {agent.task_assigned} for agent {agent} - break? {break_time}")
+        print(f"Ending {agent.task_assigned} for {agent} - break? {break_time}")
         if break_time:
             logger.debug(f"Agent {agent} is going for a break for {break_time // 60 } minutes at {self.curr_time}")
             hpq.heappush(self.events,
                          callcenter.Event(self.curr_time + datetime.timedelta(seconds=break_time), 'end_agent_break',
                                           None, agent))  # Push new arrival
+        else:
+            logger.debug(f"{agent} {agent.task_assigned} end - pull another client {self.curr_time}")
+            queue = agent.task_assigned  # assigned to call or chat
+            if not self.queue_map[queue].is_empty():  # Pull another client if queue isn't empty
+                client = self.queue_map[queue].dequeue(queue)
+                agent.handle_client(client)
+                call_duration = Probabilities.call_duration(client)
+                client.service_time = call_duration  # Update call duration
+                hpq.heappush(self.events,
+                             callcenter.Event(self.curr_time + datetime.timedelta(seconds=call_duration),
+                                              'end_call_or_chat',
+                                              client, agent))  # Push new arrival
+            else:
+                # Agent has no new calls or chats to pull set him as free
+                agent.is_free = True
 
     def end_agent_break(self, event) -> None:
         """
@@ -153,9 +172,18 @@ class CallCenter:
         @return: None
         """
         agent = event.agent
-        logger.debug(f"Agent {agent} returned for a break at {self.curr_time}")
+        logger.debug(f"Agent {agent} returned from a break at {self.curr_time}")
         agent.return_from_break()
-
+        queue = agent.task_assigned  # assigned to call or chat
+        if not self.queue_map[queue].is_empty():  # Pull another client if queue isn't empty
+            client = self.queue_map[queue].dequeue(queue)
+            agent.handle_client(client)
+            call_duration = Probabilities.call_duration(client)
+            client.service_time = call_duration  # Update call duration
+            hpq.heappush(self.events,
+                         callcenter.Event(self.curr_time + datetime.timedelta(seconds=call_duration),
+                                          'end_call_or_chat',
+                                          client, agent))  # Push new arrival
 
     def rest_end_ingredient(self):
         """
@@ -251,7 +279,7 @@ class CallCenter:
 
     def run(self):
 
-        for i in range(365):  # Iterate over a year of events
+        for i in range(1):  # Iterate over a year of events
             np.random.seed(i + 1)
             # self.sign_new_company()
             client = callcenter.Client(self.curr_time)
