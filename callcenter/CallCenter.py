@@ -28,9 +28,15 @@ logger = logging.getLogger('CallCenter')
 # Hofit said 60% is chat after the corona - so we will set this chance to generate a call or a chat
 
 
+#TODO - Calls are not registerd properly
+#TODO - Check call agents not freeing?
+#TODO - Incoming calls and chats are too far apart - change distirbution
+
 class CallCenter:
     def __init__(self, mode: str = "PriorityQueue", number_of_agents: int = 10):
         self.events = []
+        self.metrics = []
+        self.day_metrics = None
         self.curr_time = TimeHelper.string__to_full_time('01-01-2021 08:00:00')
         self.opening_hour = TimeHelper.string_to_hour('08:00:00')
         self.closing_hour = TimeHelper.string_to_hour('19:00:00')
@@ -142,8 +148,14 @@ class CallCenter:
         @return:
         """
         agent = event.agent
+        client = event.client
+        agent.handle_client(client)
+        client_data = client.get_metrics()
+        self.day_metrics.add_call_or_chat(client_data)
+
         break_time = agent.end_call_or_chat()
-        print(f"Ending {agent.task_assigned} for Agent {agent.agent_id} - break? {break_time} at {self.curr_time}")
+        logger.debug(f"Ending {agent.task_assigned} for Agent {agent.agent_id} - break? {break_time} at {self.curr_time}")
+
         if break_time:
             logger.debug(f"Agent {agent} is going for a break for {break_time // 60 } minutes at {self.curr_time}")
             hpq.heappush(self.events,
@@ -156,15 +168,17 @@ class CallCenter:
             if not self.queue_map[queue].is_empty():  # Pull another client if queue isn't empty
                 logger.debug(f"{agent} {agent.task_assigned} end - pull another client {self.curr_time}")
                 client = self.queue_map[queue].dequeue(queue)
-                agent.handle_client(client)
-                call_duration = Probabilities.call_duration(client)
-                client.service_time = call_duration  # Update call duration
+                contact_duration = agent.handle_client(client)
+                client.update_metrics(self.curr_time, contact_duration)
+                # client_data = client.get_metrics()
+                # self.day_metrics.add_call_or_chat(client_data)
                 hpq.heappush(self.events,
-                             callcenter.Event(self.curr_time + datetime.timedelta(seconds=call_duration),
+                             callcenter.Event(self.curr_time + datetime.timedelta(seconds=contact_duration),
                                               'end_call_or_chat',
                                               client, agent))  # Push new arrival
             else:
                 logger.debug(f"{agent} empty queue at {self.curr_time}")
+
 
     def end_agent_break(self, event) -> None:
         """
@@ -279,11 +293,11 @@ class CallCenter:
                 return 'call'
 
     def run(self):
-
         for i in range(1):  # Iterate over a year of events
             np.random.seed(i + 1)
             # self.sign_new_company()
             client = callcenter.Client(self.curr_time)
+            self.day_metrics = Metrics(self.curr_time)
             hpq.heappush(self.events, callcenter.Event(client.arrival_time, "incoming_call_or_chat", client))
             while self.curr_time.hour < self.closing_hour.hour:
                 event = hpq.heappop(self.events)

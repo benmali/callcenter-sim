@@ -4,6 +4,25 @@ from helpers import Probabilities, TimeHelper
 import datetime
 
 
+class ClientMetric:
+    def __init__(self, contact_method, contact_reason, client_type, sector, arrival_time, wait_time, service_time, abandoned=False, abandon_time=None):
+        self.contact_method = contact_method
+        self.contact_reason = contact_reason
+        self.client_type = client_type
+        self.sector = sector
+        self.arrival_time = arrival_time
+        self.wait_time = wait_time
+        self.service_time = service_time
+        self.abandoned = abandoned
+        self.abandoned_time = abandon_time
+
+    def __repr__(self):
+        if self.abandoned:
+            return f"Method: {self.contact_method}, Reason: {self.contact_reason}, Type: {self.client_type}, Sector: {self.sector}, Arrival: {self.arrival_time}, Wait: {self.wait_time}, Service: {self.service_time / 60}, Abandoned: Yes, Abandon Time:{self.abandoned_time}"
+        else:
+            return f"Method: {self.contact_method}, Reason: {self.contact_reason}, Type: {self.client_type}, Sector: {self.sector}, Arrival: {self.arrival_time}, Wait: {self.wait_time}, Service: {self.service_time / 60}, Abandoned: No"
+
+
 class Client:
     """
     A class to represent a client
@@ -16,6 +35,9 @@ class Client:
         self.wait_time = 0
         self.service_time = 0
         self.total_time = 0
+        self.client_type = 'Client'
+        self.abandoned = False
+        self.abandon_time = None
         call_probability = np.random.uniform(0, 1)
         if self.age > 35 and self.sector == 'Blue-Collar':  # Older employees tend to call
             if call_probability < 0.8:
@@ -32,6 +54,25 @@ class Client:
 
     def __repr__(self):
         return f"Client's Arrival: {self.arrival_time}, Method: {self.contact_method}, Reason: {self.contact_reason}"
+
+    def update_metrics(self, start_service_time: datetime.datetime, contact_duration):
+        self.set_wait_time(start_service_time)
+        self.set_service_time(contact_duration)
+        #self.total_time = self.service_time + self.wait_time
+
+    def get_metrics(self):
+        """
+        Get metrics from client
+        Times in Minutes
+        @return:
+        """
+        if self.abandoned:
+            metric = ClientMetric(self.contact_method, self.contact_reason, self.client_type, self.sector, self.arrival_time, self.wait_time.total_seconds() / 60, self.service_time, self.abandoned, self.abandon_time)
+        else:
+            metric = ClientMetric(self.contact_method, self.contact_reason, self.client_type, self.sector,
+                                  self.arrival_time, self.wait_time.total_seconds() / 60, self.service_time,
+                                  False)
+        return metric
 
     def set_wait_time(self, start_service_time: datetime.datetime):
         """

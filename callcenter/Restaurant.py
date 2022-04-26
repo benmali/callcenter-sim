@@ -6,6 +6,7 @@ class Restaurant:
         self.name = Probabilities.create_random_rest_name()
         self.arrival_time = arrival_time
         self.wait_time = 0
+        self.client_type = 'Restaurant'
 
     def __repr__(self):
         return self.name

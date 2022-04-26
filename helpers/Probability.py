@@ -160,6 +160,18 @@ class Probabilities:
             return np.random.uniform(2, 3) * 60
 
     @staticmethod
+    def contact_duration(client):
+        """
+        Return the duration of the call or chat with the call center
+        @param client: Client or Restaurant
+        @return:
+        """
+        if client.contact_method == "call":
+            return Probabilities.call_duration(client)
+        else:
+            return Probabilities.chat_duration(client)
+
+    @staticmethod
     def chat_duration(client) -> float:
         """
         Depending on the client, randomize a call duration
