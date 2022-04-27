@@ -134,6 +134,7 @@ class CustomerServiceAgent:
                 self.on_break = True
                 self.wants_break = False
                 break_time = 5.0 * 60  # Randomize this
+                self.is_free = False
                 return break_time  # return break time
 
             return 0  # Agent wants a break, but exceeded the breaks limit
@@ -143,6 +144,7 @@ class CustomerServiceAgent:
                 self.n_short_breaks += 1
                 self.on_break = True
                 self.wants_break = False
+                self.is_free = False
                 break_time = 2.0 * 60  # Randomize this
                 return break_time  # return break time
             return 0  # Agent wants a break, but exceeded the breaks limit

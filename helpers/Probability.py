@@ -23,6 +23,16 @@ class Probabilities:
         self.is_holiday = is_holiday
 
     @staticmethod
+    def max_client_patience() -> float:
+        """
+        Generate amount of time, if the client has to wait more than that time, abandon the queue
+        Assuming client type and client sector are not correlated
+        @return: max_wait_time:maximum wait time a client is willing to wait for a service before abandoning the queue
+        """
+        max_wait_time = np.random.normal(7.0, 1.5)
+        return max_wait_time
+
+    @staticmethod
     def company_sign_rate() -> int:
         """
         Set the rate of company signing (once a month, twice a month.. etc)

@@ -38,6 +38,7 @@ class Client:
         self.client_type = 'Client'
         self.abandoned = False
         self.abandon_time = None
+        self.max_wait_time = Probabilities.max_client_patience()
         call_probability = np.random.uniform(0, 1)
         if self.age > 35 and self.sector == 'Blue-Collar':  # Older employees tend to call
             if call_probability < 0.8:
