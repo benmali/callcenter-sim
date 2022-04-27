@@ -29,8 +29,7 @@ logger = logging.getLogger('CallCenter')
 # Hofit said 60% is chat after the corona - so we will set this chance to generate a call or a chat
 
 
-# TODO - Add client abandoning queue
-# TODO - Add abandon to metric on end call or char
+# TODO - Add abandon to incoming call or chat
 # TODO - Add queue metrics (average lengths - histogram)
 # TODO - Incoming calls and chats are too far apart - change distributions
 # TODO - Add interface to change the distributions
