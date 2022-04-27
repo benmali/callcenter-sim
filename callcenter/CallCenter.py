@@ -16,6 +16,7 @@ logging.basicConfig(
 
 logger = logging.getLogger('CallCenter')
 
+
 # ----- Assumptions -----
 # Call duration is dependent on client not agent
 # The day type (rainy w/e) is in charge of where is my food calls/chat
@@ -28,9 +29,10 @@ logger = logging.getLogger('CallCenter')
 # Hofit said 60% is chat after the corona - so we will set this chance to generate a call or a chat
 
 
-#TODO - Calls are not registerd properly
-#TODO - Check call agents not freeing?
-#TODO - Incoming calls and chats are too far apart - change distirbution
+# TODO - Add client abandoning queue
+# TODO - Add queue metrics (average lengths - histogram)
+# TODO - Incoming calls and chats are too far apart - change distributions
+# TODO - Add interface to change the distributions
 
 class CallCenter:
     def __init__(self, mode: str = "PriorityQueue", number_of_agents: int = 10):
@@ -54,11 +56,16 @@ class CallCenter:
                 self.starting_number_of_agents * percentage_of_rest_agents)  # At least 1 agent
             self.n_end_client_agents = self.starting_number_of_agents - self.n_rest_agents  # Other agents serve clients
             # i % 2 condition splits half the agents for chat duty other half for calls
-            self.end_service_agents = [CustomerServiceAgent(i, self.call_queue if i % 2 == 0 else self.chat_queue, self.curr_time) for i in range(self.n_end_client_agents)]
-            self.rest_service_agents = [CustomerServiceAgent(i, self.call_queue, self.curr_time) for i in range(self.n_rest_agents)]
+            self.end_service_agents = [
+                CustomerServiceAgent(i, self.call_queue if i % 2 == 0 else self.chat_queue, self.curr_time) for i in
+                range(self.n_end_client_agents)]
+            self.rest_service_agents = [CustomerServiceAgent(i, self.call_queue, self.curr_time) for i in
+                                        range(self.n_rest_agents)]
         else:  # Regular and PriorityQueue
             # i % 2 condition splits half the agents for chat duty other half for calls
-            self.service_agents = [CustomerServiceAgent(i, self.call_queue if i % 2 == 0 else self.chat_queue, self.curr_time) for i in range(self.starting_number_of_agents)]
+            self.service_agents = [
+                CustomerServiceAgent(i, self.call_queue if i % 2 == 0 else self.chat_queue, self.curr_time) for i in
+                range(self.starting_number_of_agents)]
 
         self.n_end_clients = 100_0000
         self.n_employees_by_sector = {"High-Tech": 800_000,
@@ -101,47 +108,39 @@ class CallCenter:
             agents = self.service_agents
             queue = None
 
+        # Try pulling from queue directly on incoming call, at least one call or chat in queue
         queue_to_pull = self.decide_call_or_chat()
-
-        if queue_to_pull == 'call':
-            for agent in agents:
+        curr_client = None  # No client is pulled yet
+        for agent in agents:
+            if queue_to_pull == 'call':
                 if agent.is_free_for_call():
-                    client = self.dequeue_call(queue)
-                    #agent.answer_call(client)
-                    agent.handle_client(client) # Client gets pulled from queue agent becomes busy
-                    logger.info(f"{agent} handling {agent.task_assigned} from {client}")
-                    call_duration = Probabilities.call_duration(client)
-                    client.set_wait_time(self.curr_time)
-                    client.set_service_time(call_duration)  # Update call duration
-                    hpq.heappush(self.events,
-                                 callcenter.Event(self.curr_time + datetime.timedelta(seconds=call_duration),
-                                                  'end_call_or_chat',
-                                                  client, agent))  # Push new arrival
-                    break  # Agent is assigned for the call, exit loop
-        else:
-            for agent in agents:
+                    curr_client = self.dequeue_call(queue)
+            else:
                 if agent.is_free_for_chat():
-                    client = self.dequeue_chat(queue)
-                    #agent.answer_chat(client)
-                    agent.handle_client(client) # Client gets pulled from queue agent becomes busy
-                    logger.info(f"{agent} handling {agent.task_assigned} from {client}")
-                    chat_duration = Probabilities.chat_duration(client)
-                    client.set_wait_time(self.curr_time)
-                    client.set_service_time(chat_duration)  # Update call duration
-                    hpq.heappush(self.events,
-                                 callcenter.Event(self.curr_time + datetime.timedelta(seconds=chat_duration),
-                                                  'end_call_or_chat',
-                                                  client, agent))  # Push new arrival
-                    break  # Agent is assigned for the call, exit loop
+                    curr_client = self.dequeue_chat(queue)
+
+            # An agent is free to take a client call or chat
+            if curr_client:
+                logger.info(f"{agent} answering {client.contact_method} at {self.curr_time}")
+                contact_duration = agent.handle_client(curr_client)
+                client.set_wait_time(self.curr_time)
+                client.set_service_time(contact_duration)  # Update call duration
+                hpq.heappush(self.events,
+                             callcenter.Event(self.curr_time + datetime.timedelta(seconds=contact_duration),
+                                              'end_call_or_chat',
+                                              curr_client, agent))  # Push new arrival
+                break
 
         # Generate new chats and call arrivals
         next_call_time = client.arrival_time + datetime.timedelta(seconds=Probabilities.call_rate(client.arrival_time))
         hpq.heappush(self.events,
-                     callcenter.Event(next_call_time, 'incoming_call_or_chat', callcenter.Client(next_call_time)))  # Push new arrival
+                     callcenter.Event(next_call_time, 'incoming_call_or_chat',
+                                      callcenter.Client(next_call_time)))  # Push new arrival
 
         next_chat_time = client.arrival_time + datetime.timedelta(seconds=Probabilities.chat_rate(client.arrival_time))
         hpq.heappush(self.events,
-                     callcenter.Event(next_chat_time, 'incoming_call_or_chat', callcenter.Client(next_chat_time)))  # Push new arrival
+                     callcenter.Event(next_chat_time, 'incoming_call_or_chat',
+                                      callcenter.Client(next_chat_time)))  # Push new arrival
 
     def end_call_or_chat(self, event):
         """
@@ -153,12 +152,12 @@ class CallCenter:
         client = event.client
         client_data = client.get_metrics()
         self.day_metrics.add_call_or_chat(client_data)
-
         break_time = agent.end_call_or_chat()
-        logger.debug(f"Ending {agent.task_assigned} for Agent {agent.agent_id} - break? {break_time} at {self.curr_time}")
+        logger.debug(
+            f"{agent} - break? {break_time} at {self.curr_time}. ending {agent.task_assigned} - duration: {client_data.service_time / 60 }")
 
         if break_time:
-            logger.debug(f"Agent {agent} is going for a break for {break_time // 60 } minutes at {self.curr_time}")
+            logger.debug(f"Agent {agent} is going for a break for {break_time // 60} minutes at {self.curr_time}")
             hpq.heappush(self.events,
                          callcenter.Event(self.curr_time + datetime.timedelta(seconds=break_time), 'end_agent_break',
                                           None, agent))  # Push new arrival
@@ -179,7 +178,6 @@ class CallCenter:
                 logger.debug(f"{agent} empty queue at {self.curr_time}")
                 # No calls to pull, set agent as free
 
-
     def end_agent_break(self, event) -> None:
         """
         Return agent from break event
@@ -193,11 +191,14 @@ class CallCenter:
         if not self.queue_map[queue].is_empty():  # Pull another client if queue isn't empty
             client = self.queue_map[queue].dequeue(queue)
             contact_duration = agent.handle_client(client)
+            logger.info(f"{agent} answering {client.contact_method} at {self.curr_time}")
             client.update_metrics(self.curr_time, contact_duration)
             hpq.heappush(self.events,
                          callcenter.Event(self.curr_time + datetime.timedelta(seconds=contact_duration),
                                           'end_call_or_chat',
                                           client, agent))  # Push new arrival
+        else:
+            logger.debug(f"{agent} returned from a break and queue is empty")
 
     def rest_end_ingredient(self):
         """

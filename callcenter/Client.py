@@ -59,7 +59,6 @@ class Client:
     def update_metrics(self, start_service_time: datetime.datetime, contact_duration):
         self.set_wait_time(start_service_time)
         self.set_service_time(contact_duration)
-        #self.total_time = self.service_time + self.wait_time
 
     def get_metrics(self):
         """
