@@ -60,6 +60,11 @@ class Client:
         self.set_wait_time(start_service_time)
         self.set_service_time(contact_duration)
 
+    def abandon_queue(self):
+        self.abandoned = True
+        self.abandon_time = self.arrival_time + self.max_wait_time
+        self.wait_time = self.max_wait_time
+
     def get_metrics(self):
         """
         Get metrics from client

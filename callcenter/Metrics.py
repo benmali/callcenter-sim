@@ -17,6 +17,8 @@ class Metrics:
         self.n_rejected_calls = 0  #
         self.agent_starvation = {}  # time agent had no work (waited for work)
         self.queue_lengths = {}  # Time: (len(call_queue), len(chat_queue)
+        self.chat_client_abandoned = 0
+        self.call_client_abandoned = 0
     # Number of end employees ratio to agents
     # What is the number of agents needed to provide SLA when a new company of size X signs?
 
@@ -27,5 +29,15 @@ class Metrics:
             # add other stuff here
         else:
             self.chats.append(client_data)
+
+    def add_abandonment(self, client_data):
+        contact_method = client_data.contact_method
+        if contact_method == "call":
+            self.call_client_abandoned += 1
+            # add other stuff here
+        else:
+            self.chat_client_abandoned +=1
+
+
 
 

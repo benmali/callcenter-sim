@@ -30,6 +30,7 @@ logger = logging.getLogger('CallCenter')
 
 
 # TODO - Add client abandoning queue
+# TODO - Add abandon to metric on end call or char
 # TODO - Add queue metrics (average lengths - histogram)
 # TODO - Incoming calls and chats are too far apart - change distributions
 # TODO - Add interface to change the distributions
@@ -155,7 +156,6 @@ class CallCenter:
         break_time = agent.end_call_or_chat()
         logger.debug(
             f"{agent} - break? {break_time} at {self.curr_time}. ending {agent.task_assigned} - duration: {client_data.service_time / 60 }")
-
         if break_time:
             logger.debug(f"Agent {agent} is going for a break for {break_time // 60} minutes at {self.curr_time}")
             hpq.heappush(self.events,
@@ -165,18 +165,29 @@ class CallCenter:
         # Agent is not going for a break
         else:
             queue = agent.task_assigned  # assigned to call or chat
-            if not self.queue_map[queue].is_empty():  # Pull another client if queue isn't empty
-                logger.debug(f"{agent} {agent.task_assigned} end - pull another client {self.curr_time}")
+            pulled_valid_client = False
+            while not self.queue_map[queue].is_empty():  # Pull another client if queue isn't empty
+                logger.debug(f"{agent} {agent.task_assigned} end - trying to pull another client {self.curr_time}")
                 client = self.queue_map[queue].dequeue(queue)
+                if self.curr_time - client.arrival_time > client.max_wait_time:
+                    client.abandon_queue()
+                    client_data = client.get_metrics()
+                    logger.info(f"{client} abandoned at {client.abandon_time}")
+                    self.day_metrics.add_abandonment(client_data)
+                    continue
+                pulled_valid_client = True
+                logger.debug(f"{agent} {agent.task_assigned} pulled another client {self.curr_time}")
                 contact_duration = agent.handle_client(client)
                 client.update_metrics(self.curr_time, contact_duration)
                 hpq.heappush(self.events,
                              callcenter.Event(self.curr_time + datetime.timedelta(seconds=contact_duration),
                                               'end_call_or_chat',
                                               client, agent))  # Push new arrival
-            else:
+                break
+
+            if not pulled_valid_client:
                 logger.debug(f"{agent} empty queue at {self.curr_time}")
-                # No calls to pull, set agent as free
+            # No calls to pull, set agent as free
 
     def end_agent_break(self, event) -> None:
         """
@@ -308,6 +319,9 @@ class CallCenter:
             # reset day
             self.events = []
             self.curr_time = TimeHelper.set_next_day(self.curr_time)
+            print("\n------ Metrics ------\n")
+            print(f"Chat abandon {self.day_metrics.chat_client_abandoned}")
+            print(f"Call abandon {self.day_metrics.call_client_abandoned}")
 
 
 if __name__ == "__main__":
