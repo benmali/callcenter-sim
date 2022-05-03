@@ -19,6 +19,7 @@ class Metrics:
         self.queue_lengths = {}  # Time: (len(call_queue), len(chat_queue)
         self.chat_client_abandoned = 0
         self.call_client_abandoned = 0
+        self.arrival_histogram = {}
     # Number of end employees ratio to agents
     # What is the number of agents needed to provide SLA when a new company of size X signs?
 

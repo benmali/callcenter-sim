@@ -37,9 +37,10 @@ logger = logging.getLogger('CallCenter')
 class CallCenter:
     def __init__(self, mode: str = "PriorityQueue", number_of_agents: int = 10):
         self.events = []
-        self.metrics = []
+        self.metrics_list = []
         self.day_metrics = None
         self.curr_time = TimeHelper.string__to_full_time('01-01-2021 08:00:00')
+        self.metrics = Metrics(self.curr_time.date())
         self.opening_hour = TimeHelper.string_to_hour('08:00:00')
         self.closing_hour = TimeHelper.string_to_hour('19:00:00')
         self.n_restaurants = 1_000
@@ -89,6 +90,10 @@ class CallCenter:
 
         client = event.client
         client.arrival_time = self.curr_time
+        if self.curr_time.hour in self.metrics.arrival_histogram:
+            self.metrics.arrival_histogram[self.curr_time.hour] += 1
+        else:
+            self.metrics.arrival_histogram[self.curr_time.hour] = 1
         logger.info(f"Incoming {event.client.contact_method} from {client}")
         if event.client.contact_method == 'call':
             self.call_queue.enqueue(client)
@@ -131,16 +136,11 @@ class CallCenter:
                                               curr_client, agent))  # Push new arrival
                 break
 
-        # Generate new chats and call arrivals
-        next_call_time = client.arrival_time + datetime.timedelta(seconds=Probabilities.call_rate(client.arrival_time))
+        # # Generate new chats and call arrivals
+        next_call_time = self.curr_time + datetime.timedelta(hours=Probabilities.call_rate(self.curr_time))
         hpq.heappush(self.events,
                      callcenter.Event(next_call_time, 'incoming_call_or_chat',
                                       callcenter.Client(next_call_time)))  # Push new arrival
-
-        next_chat_time = client.arrival_time + datetime.timedelta(seconds=Probabilities.chat_rate(client.arrival_time))
-        hpq.heappush(self.events,
-                     callcenter.Event(next_chat_time, 'incoming_call_or_chat',
-                                      callcenter.Client(next_chat_time)))  # Push new arrival
 
     def end_call_or_chat(self, event):
         """
@@ -148,6 +148,7 @@ class CallCenter:
         @param event:
         @return:
         """
+
         agent = event.agent
         client = event.client
         client_data = client.get_metrics()
@@ -321,6 +322,7 @@ class CallCenter:
             print("\n------ Metrics ------\n")
             print(f"Chat abandon {self.day_metrics.chat_client_abandoned}")
             print(f"Call abandon {self.day_metrics.call_client_abandoned}")
+            print(self.metrics.arrival_histogram)
 
 
 if __name__ == "__main__":

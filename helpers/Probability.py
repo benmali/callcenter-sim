@@ -134,11 +134,21 @@ class Probabilities:
         @return:
         """
         if curr_hour.hour < 11:
-            return 1 / np.random.exponential(1 / 5000)
-        elif 11 <= curr_hour.hour <= 14:
-            return 1 / np.random.exponential(1 / 1000)
+            n_arrivals = 50
+            return np.random.exponential(1 / 20)
+
+        elif curr_hour.hour == 11:
+            return np.random.exponential(1 / 50)
+        elif curr_hour.hour == 12:
+            return np.random.exponential(1 / 200)
+        elif curr_hour.hour == 13:
+            return np.random.exponential(1 / 200)
+        elif curr_hour.hour == 14:
+            return np.random.exponential(1 / 100)
         else:
-            return 1 / np.random.exponential(1 / 3500)
+            print(f"hour is {curr_hour.hour}")
+            n_arrivals = 120
+            return np.random.exponential(1 / 35)
 
     @staticmethod
     def chat_rate(curr_hour: datetime.datetime):
@@ -148,11 +158,11 @@ class Probabilities:
         @return:
         """
         if curr_hour.hour < 11:
-            return 1 / np.random.exponential(1 / 10000)
+            return np.random.exponential(1 / 5)
         elif 11 <= curr_hour.hour <= 14:
-            return 1 / np.random.exponential(1 / 3000)
+            return np.random.exponential(1 / 10)
         else:
-            return 1 / np.random.exponential(1 / 450)
+            return np.random.exponential(1 / 7)
 
     @staticmethod
     def call_duration(client) -> float:
