@@ -1,4 +1,4 @@
-from callcenter import CallQueue, ChatQueue, CustomerServiceAgent, Metrics, Event, Restaurant
+from callcenter import CallQueue, ChatQueue, CustomerServiceAgent, Metrics, Event, Restaurant, Graphs
 import math
 import callcenter
 from helpers import Probabilities, TimeHelper
@@ -9,7 +9,7 @@ import logging
 import sys
 
 logging.basicConfig(
-    level=logging.DEBUG,
+    level=logging.INFO,
     format='%(message)s',
     stream=sys.stdout
 )
@@ -27,21 +27,22 @@ logger = logging.getLogger('CallCenter')
 # Login/password/order process calls are unrelated to weather (no correlation)
 # Assuming restaurants only call (as most of them call anyway)
 # Hofit said 60% is chat after the corona - so we will set this chance to generate a call or a chat
-
+# We assume that as long as the restaurant queue isn't empty, the call rate and chat rate raises by 1.1^ len(rest_queue)
 
 # TODO - Add queue metrics (average lengths - histogram)
 # TODO - Add interface to change the distributions
 # TODO - Test different modes
 # TODO - add restaurant calling
 
+
 class CallCenter:
-    def __init__(self, mode: str = "PriorityQueue", number_of_agents: int = 10):
+    def __init__(self, weather='sunny',  mode: str = "PriorityQueue", number_of_agents: int = 10,):
         self.events = []
         self.metrics_list = []
         self.day_metrics = None
         self.curr_time = TimeHelper.string__to_full_time('01-01-2021 08:00:00')
         self.opening_hour = TimeHelper.string_to_hour('08:00:00')
-        self.closing_hour = TimeHelper.string_to_hour('19:00:00')
+        self.closing_hour = TimeHelper.string_to_hour('23:00:00')
         self.n_restaurants = 1_000
         self.mode = mode  # PriorityQueue, SeparatePool, Regular
         self.call_load_ratio = None  # queue size / number of agents assigned to calls
@@ -49,6 +50,8 @@ class CallCenter:
         self.starting_number_of_agents = number_of_agents
         self.call_queue = CallQueue(self.mode)
         self.chat_queue = ChatQueue(self.mode)
+        self.n_rest_in_queue = 0
+        self.weather = weather
 
         if self.mode == 'SeparatePool':
             percentage_of_rest_agents = 0.2  # 20% of the agents will answer calls from restaurants
@@ -76,7 +79,8 @@ class CallCenter:
             'end_call_or_chat': self.end_call_or_chat,
             'sign_new_company': self.sign_new_company,
             'sign_new_restaurant': self.sign_new_restaurant,
-            'end_agent_break': self.end_agent_break
+            'end_agent_break': self.end_agent_break,
+            'restaurant_end_ingredient': self.rest_end_ingredient
         }
         self.queue_map = {"call": self.call_queue, "chat": self.chat_queue}
 
@@ -133,7 +137,9 @@ class CallCenter:
                 break
 
         # # Generate new chats and call arrivals
-        next_call_time = self.curr_time + datetime.timedelta(hours=Probabilities.call_rate(self.curr_time))
+        next_call_time = self.curr_time + datetime.timedelta(hours=Probabilities.call_rate(self.curr_time,
+                                                                                           self.n_rest_in_queue,
+                                                                                           self.weather))
         hpq.heappush(self.events,
                      callcenter.Event(next_call_time, 'incoming_call_or_chat',
                                       callcenter.Client(next_call_time)))  # Push new arrival
@@ -209,11 +215,17 @@ class CallCenter:
     def rest_end_ingredient(self):
         """
         Simulate a restaurant running out of something
-        The restauarant keeps getting orders for some dish they cant make
+        The restaurant keeps getting orders for some dish they cant make
         Clients order this and their food wont arrive
         @return:
         """
         pass
+        # Generate next restaurant call
+        rest = Restaurant(self.curr_time)
+        # hpq.heappush(self.events,
+        #              callcenter.Event(self.curr_time + datetime.timedelta(seconds=contact_duration),
+        #                               'rest_end_ingredient',
+        #                               rest))  # Push new arrival
         # Simulate a call from a restaurant
         # This issue makes a lot of calls and complaints
         # To simplify, we will generate 5 client calls and 1 rest call for this event
@@ -318,6 +330,7 @@ class CallCenter:
             print(f"Number of calls handled {len(self.day_metrics.calls)}")
             print(f"Call reason breakdown: {self.day_metrics.get_contact_reason_breakdown('call')}")
             print(f"Chat reason breakdown: {self.day_metrics.get_contact_reason_breakdown('chat')}")
+            Graphs.plot_arrival_histogram(self.day_metrics.arrival_histogram)
             # reset day
             self.events = []
             self.curr_time = TimeHelper.set_next_day(self.curr_time)

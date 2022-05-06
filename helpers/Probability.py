@@ -127,25 +127,51 @@ class Probabilities:
             pass
 
     @staticmethod
-    def call_rate(curr_hour: datetime.datetime):
+    def call_rate(curr_hour: datetime.datetime, rest_queue_len: int, weather=None):
         """
         Return the time between calls depending on the hour of the day
         Formula is x ~ Pois(100) (100 clients/ 1 hour) -> x ~ Exp(1 / 100) (time between clients, in hours)
+        We assume the more restaurants in the queue, generates 2% per restaurant
+        Therefore we multiply the arrival rate by 1.02 * times the restaurants in queue
         @param curr_hour:
         @return:
         """
-        if curr_hour.hour < 11:
-            n_arrivals = 50
-            return np.random.exponential(1 / 20)
+        if weather == 'rainy':
+            weather_factor = 1.3
+        else:
+            weather_factor = 1
 
+        if curr_hour.hour == 8:
+            return np.random.exponential(1 / (10 * weather_factor * 1.02 ** rest_queue_len))
+        elif curr_hour.hour == 9:
+            return np.random.exponential(1 / (75 * weather_factor * 1.02 ** rest_queue_len))
+        elif curr_hour.hour == 10:
+            return np.random.exponential(1 / (175 * weather_factor * 1.02 ** rest_queue_len))
         elif curr_hour.hour == 11:
-            return np.random.exponential(1 / 50)
+            return np.random.exponential(1 / (250 * weather_factor * 1.02 ** rest_queue_len))
         elif curr_hour.hour == 12:
-            return np.random.exponential(1 / 250)
+            return np.random.exponential(1 / (300 * weather_factor * 1.02 ** rest_queue_len))
         elif curr_hour.hour == 13:
-            return np.random.exponential(1 / 250)
+            return np.random.exponential(1 / (400 * weather_factor * 1.02 ** rest_queue_len))
         elif curr_hour.hour == 14:
-            return np.random.exponential(1 / 100)
+            return np.random.exponential(1 / (430 * weather_factor * 1.02 ** rest_queue_len))
+        elif curr_hour.hour == 15:
+            return np.random.exponential(1 / (200 * weather_factor * 1.02 ** rest_queue_len))
+        elif curr_hour.hour == 16:
+            return np.random.exponential(1 / (130 * weather_factor * 1.02 ** rest_queue_len))
+        elif curr_hour.hour == 17:
+            return np.random.exponential(1 / (90 * weather_factor * 1.02 ** rest_queue_len))
+        elif curr_hour.hour == 18:
+            return np.random.exponential(1 / (75 * weather_factor * 1.02 ** rest_queue_len))
+        elif curr_hour.hour == 19:
+            return np.random.exponential(1 / (60 * weather_factor * 1.02 ** rest_queue_len))
+        elif curr_hour.hour == 20:
+            return np.random.exponential(1 / (45 * weather_factor * 1.02 ** rest_queue_len))
+        elif curr_hour.hour == 21:
+            return np.random.exponential(1 / (35 * weather_factor * 1.02 ** rest_queue_len))
+        elif curr_hour.hour == 22:
+            return np.random.exponential(1 / (20 * weather_factor * 1.02 ** rest_queue_len))
+
         else:
             n_arrivals = 120
 
