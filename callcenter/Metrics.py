@@ -1,4 +1,5 @@
 import datetime
+from collections import defaultdict
 
 
 class Metrics:
@@ -6,8 +7,8 @@ class Metrics:
         self.metric_date = metric_date
         self.total_calls = 0
         self.total_chats = 0
-        self.calls = [] # Store whole tuple of data
-        self.chats = [] # Store whole tuple of data
+        self.calls = []  # Store whole tuple of data
+        self.chats = []  # Store whole tuple of data
         self.chat_durations = []
         self.call_durations = []
         self.number_of_calls = 0
@@ -19,7 +20,7 @@ class Metrics:
         self.queue_lengths = {}  # Time: (len(call_queue), len(chat_queue)
         self.chat_client_abandoned = 0
         self.call_client_abandoned = 0
-        self.arrival_histogram = {}
+        self.arrival_histogram = defaultdict(int)
     # Number of end employees ratio to agents
     # What is the number of agents needed to provide SLA when a new company of size X signs?
 
@@ -38,6 +39,20 @@ class Metrics:
             # add other stuff here
         else:
             self.chat_client_abandoned +=1
+
+    def get_contact_reason_breakdown(self, contact_method):
+        """
+        Return call reason: number of clients
+        @return:
+        """
+        contact_reason = defaultdict(int)
+        if contact_method == 'call':
+            contacts = self.calls
+        else:
+            contacts = self.chats
+        for contact in contacts:
+            contact_reason[contact.contact_reason] += 1
+        return dict(contact_reason)
 
 
 

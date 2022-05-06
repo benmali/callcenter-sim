@@ -130,6 +130,7 @@ class Probabilities:
     def call_rate(curr_hour: datetime.datetime):
         """
         Return the time between calls depending on the hour of the day
+        Formula is x ~ Pois(100) (100 clients/ 1 hour) -> x ~ Exp(1 / 100) (time between clients, in hours)
         @param curr_hour:
         @return:
         """
@@ -140,14 +141,14 @@ class Probabilities:
         elif curr_hour.hour == 11:
             return np.random.exponential(1 / 50)
         elif curr_hour.hour == 12:
-            return np.random.exponential(1 / 200)
+            return np.random.exponential(1 / 250)
         elif curr_hour.hour == 13:
-            return np.random.exponential(1 / 200)
+            return np.random.exponential(1 / 250)
         elif curr_hour.hour == 14:
             return np.random.exponential(1 / 100)
         else:
-            print(f"hour is {curr_hour.hour}")
             n_arrivals = 120
+
             return np.random.exponential(1 / 35)
 
     @staticmethod

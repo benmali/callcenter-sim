@@ -29,10 +29,10 @@ logger = logging.getLogger('CallCenter')
 # Hofit said 60% is chat after the corona - so we will set this chance to generate a call or a chat
 
 
-# TODO - Add abandon to incoming call or chat
 # TODO - Add queue metrics (average lengths - histogram)
-# TODO - Incoming calls and chats are too far apart - change distributions
 # TODO - Add interface to change the distributions
+# TODO - Test different modes
+# TODO - add restaurant calling
 
 class CallCenter:
     def __init__(self, mode: str = "PriorityQueue", number_of_agents: int = 10):
@@ -40,7 +40,6 @@ class CallCenter:
         self.metrics_list = []
         self.day_metrics = None
         self.curr_time = TimeHelper.string__to_full_time('01-01-2021 08:00:00')
-        self.metrics = Metrics(self.curr_time.date())
         self.opening_hour = TimeHelper.string_to_hour('08:00:00')
         self.closing_hour = TimeHelper.string_to_hour('19:00:00')
         self.n_restaurants = 1_000
@@ -90,10 +89,7 @@ class CallCenter:
 
         client = event.client
         client.arrival_time = self.curr_time
-        if self.curr_time.hour in self.metrics.arrival_histogram:
-            self.metrics.arrival_histogram[self.curr_time.hour] += 1
-        else:
-            self.metrics.arrival_histogram[self.curr_time.hour] = 1
+        self.day_metrics.arrival_histogram[self.curr_time.hour] += 1  # arrival histogram is default dict
         logger.info(f"Incoming {event.client.contact_method} from {client}")
         if event.client.contact_method == 'call':
             self.call_queue.enqueue(client)
@@ -148,7 +144,6 @@ class CallCenter:
         @param event:
         @return:
         """
-
         agent = event.agent
         client = event.client
         client_data = client.get_metrics()
@@ -315,14 +310,17 @@ class CallCenter:
                 self.curr_time = event.time
                 handle_event = self.event_mapping.get(event.event_type)
                 handle_event(event)
-
-            # reset day
-            self.events = []
-            self.curr_time = TimeHelper.set_next_day(self.curr_time)
             print("\n------ Metrics ------\n")
             print(f"Chat abandon {self.day_metrics.chat_client_abandoned}")
             print(f"Call abandon {self.day_metrics.call_client_abandoned}")
-            print(self.metrics.arrival_histogram)
+            print(f"Arrival histogram for {self.curr_time.date()}: {dict(self.day_metrics.arrival_histogram)}")
+            print(f"Number of chats handled {len(self.day_metrics.chats)}")
+            print(f"Number of calls handled {len(self.day_metrics.calls)}")
+            print(f"Call reason breakdown: {self.day_metrics.get_contact_reason_breakdown('call')}")
+            print(f"Chat reason breakdown: {self.day_metrics.get_contact_reason_breakdown('chat')}")
+            # reset day
+            self.events = []
+            self.curr_time = TimeHelper.set_next_day(self.curr_time)
 
 
 if __name__ == "__main__":

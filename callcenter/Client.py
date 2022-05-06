@@ -50,8 +50,10 @@ class Client:
                 self.contact_method = 'call'
             else:  # 60% are chats
                 self.contact_method = 'chat'
-
-        self.contact_reason = 'Where is my food'
+        if self.age > 45 and self.sector == 'Blue-Collar' and np.random.uniform(0, 1) < 0.8:
+            self.contact_reason = 'Reset Password'
+        else:
+            self.contact_reason = 'Where is my food'
 
     def __repr__(self):
         return f"Client's Arrival: {self.arrival_time}, Method: {self.contact_method}, Reason: {self.contact_reason}"
