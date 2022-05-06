@@ -28,18 +28,19 @@ class Client:
     A class to represent a client
     """
 
-    def __init__(self, arrival_time, sector=None, age=None, contact_method=None, contact_reason=None):
+    def __init__(self, arrival_time, client_type='Client', sector=None, age=None, contact_method=None, contact_reason=None):
         self.arrival_time = arrival_time
         self.sector = 'Blue-Collar' if np.random.uniform(0, 1) < 0.2 else 'High-Tech'
         self.age = np.random.normal(38, 7)  # avg age is 38, lower bound is 18, upper bound is 60
         self.wait_time = 0
         self.service_time = 0
         self.total_time = 0
-        self.client_type = 'Client'
+        self.client_type = client_type
         self.abandoned = False
         self.abandon_time = None
         self.max_wait_time = Probabilities.max_client_patience()
         call_probability = np.random.uniform(0, 1)
+
         if self.age > 35 and self.sector == 'Blue-Collar':  # Older employees tend to call
             if call_probability < 0.8:
                 self.contact_method = 'call'
@@ -50,10 +51,16 @@ class Client:
                 self.contact_method = 'call'
             else:  # 60% are chats
                 self.contact_method = 'chat'
+
         if self.age > 45 and self.sector == 'Blue-Collar' and np.random.uniform(0, 1) < 0.8:
             self.contact_reason = 'Reset Password'
         else:
             self.contact_reason = 'Where is my food'
+
+        if client_type == 'Restaurant':
+            self.sector = 'Restaurant'
+            self.contact_method = 'call'
+            self.contact_reason = 'Out of ingredient'
 
     def __repr__(self):
         return f"Client's Arrival: {self.arrival_time}, Method: {self.contact_method}, Reason: {self.contact_reason}"

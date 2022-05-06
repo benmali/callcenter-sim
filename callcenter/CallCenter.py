@@ -1,4 +1,4 @@
-from callcenter import CallQueue, ChatQueue, CustomerServiceAgent, Metrics, Event, Restaurant, Graphs
+from callcenter import CallQueue, ChatQueue, CustomerServiceAgent, Metrics, Event, Graphs
 import math
 import callcenter
 from helpers import Probabilities, TimeHelper
@@ -92,6 +92,8 @@ class CallCenter:
         """
 
         client = event.client
+        if client.client_type == 'Restaurant':
+            self.n_rest_in_queue += 1
         client.arrival_time = self.curr_time
         self.day_metrics.arrival_histogram[self.curr_time.hour] += 1  # arrival histogram is default dict
         logger.info(f"Incoming {event.client.contact_method} from {client}")
@@ -102,7 +104,7 @@ class CallCenter:
 
         # If an agent is available, call end_call event
         if self.mode == 'SeparatePool':
-            if isinstance(client, Restaurant):
+            if client.client_type == 'Restaurant':
                 agents = self.rest_service_agents
                 queue = 'restaurants'
             else:
@@ -137,12 +139,18 @@ class CallCenter:
                 break
 
         # # Generate new chats and call arrivals
-        next_call_time = self.curr_time + datetime.timedelta(hours=Probabilities.call_rate(self.curr_time,
+        next_contact_time = self.curr_time + datetime.timedelta(hours=Probabilities.contact_rate(self.curr_time,
                                                                                            self.n_rest_in_queue,
                                                                                            self.weather))
-        hpq.heappush(self.events,
-                     callcenter.Event(next_call_time, 'incoming_call_or_chat',
-                                      callcenter.Client(next_call_time)))  # Push new arrival
+
+        if np.random.uniform(0, 1) < 0.05:
+            hpq.heappush(self.events,
+                         callcenter.Event(next_contact_time, 'incoming_call_or_chat',
+                                          callcenter.Client(next_contact_time, 'Restaurant')))  # Push new rest arrival
+        else:
+            hpq.heappush(self.events,
+                         callcenter.Event(next_contact_time, 'incoming_call_or_chat',
+                                          callcenter.Client(next_contact_time)))  # Push new arrival
 
     def end_call_or_chat(self, event):
         """
@@ -153,6 +161,8 @@ class CallCenter:
         agent = event.agent
         client = event.client
         client_data = client.get_metrics()
+        if client.client_type == 'Restaurant':
+            self.n_rest_in_queue -= 1
         self.day_metrics.add_call_or_chat(client_data)
         break_time = agent.end_call_or_chat()
         logger.debug(
@@ -212,7 +222,7 @@ class CallCenter:
         else:
             logger.debug(f"{agent} returned from a break and queue is empty")
 
-    def rest_end_ingredient(self):
+    def rest_end_ingredient(self, event):
         """
         Simulate a restaurant running out of something
         The restaurant keeps getting orders for some dish they cant make
@@ -221,11 +231,9 @@ class CallCenter:
         """
         pass
         # Generate next restaurant call
-        rest = Restaurant(self.curr_time)
-        # hpq.heappush(self.events,
-        #              callcenter.Event(self.curr_time + datetime.timedelta(seconds=contact_duration),
-        #                               'rest_end_ingredient',
-        #                               rest))  # Push new arrival
+        rest = callcenter.Client(self.curr_time, 'Restaurant')
+        hpq.heappush(self.events,
+                     callcenter.Event(self.curr_time, 'incoming_call_or_chat', rest))  # Push new arrival
         # Simulate a call from a restaurant
         # This issue makes a lot of calls and complaints
         # To simplify, we will generate 5 client calls and 1 rest call for this event
@@ -331,7 +339,9 @@ class CallCenter:
             print(f"Call reason breakdown: {self.day_metrics.get_contact_reason_breakdown('call')}")
             print(f"Chat reason breakdown: {self.day_metrics.get_contact_reason_breakdown('chat')}")
             Graphs.plot_arrival_histogram(self.day_metrics.arrival_histogram)
+            Graphs.plot_rest_wait_histogram(self.day_metrics.get_rest_wait_histogram())
             # reset day
+            x = self.day_metrics.get_rest_calls()
             self.events = []
             self.curr_time = TimeHelper.set_next_day(self.curr_time)
 

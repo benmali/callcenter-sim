@@ -1,6 +1,4 @@
 
-from callcenter.Restaurant import Restaurant
-
 
 class Queue:
     def __init__(self, mode='PriorityQueue'):
@@ -15,7 +13,7 @@ class Queue:
         Assert is queue is empty
         @return: bool
         """
-        return len(self.clients) == 0
+        return len(self.clients) == 0 and len(self.restaurants) == 0
 
     def _pull_priority(self):
         """
@@ -69,7 +67,7 @@ class Queue:
         Client can be restaurant as well
         """
         if self.mode in ('PriorityQueue', 'SeparatePool'):
-            if isinstance(client, Restaurant):
+            if client.client_type == 'Restaurant':
                 self.restaurants.append(client)
             else:
                 self.clients.append(client)

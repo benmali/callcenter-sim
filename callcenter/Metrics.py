@@ -1,7 +1,6 @@
 import datetime
 from collections import defaultdict
-
-
+import decimal
 class Metrics:
     def __init__(self, metric_date: datetime.datetime):
         self.metric_date = metric_date
@@ -54,6 +53,17 @@ class Metrics:
             contact_reason[contact.contact_reason] += 1
         return dict(contact_reason)
 
+    def get_rest_calls(self):
+        return [call for call in self.calls if call.client_type =='Restaurant']
 
+    def get_rest_wait_histogram(self):
+        """
+        Get number of rest waiting specific time
+        @return:
+        """
+        rest_calls_hist = defaultdict(int)
+        for call in self.get_rest_calls():
 
+            rest_calls_hist[round(call.wait_time, 2)] += 1
+        return rest_calls_hist
 

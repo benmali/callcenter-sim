@@ -127,7 +127,7 @@ class Probabilities:
             pass
 
     @staticmethod
-    def call_rate(curr_hour: datetime.datetime, rest_queue_len: int, weather=None):
+    def contact_rate(curr_hour: datetime.datetime, rest_queue_len: int, weather=None):
         """
         Return the time between calls depending on the hour of the day
         Formula is x ~ Pois(100) (100 clients/ 1 hour) -> x ~ Exp(1 / 100) (time between clients, in hours)
@@ -178,20 +178,6 @@ class Probabilities:
             return np.random.exponential(1 / 35)
 
     @staticmethod
-    def chat_rate(curr_hour: datetime.datetime):
-        """
-        Return the time between chats depending on the hour of the day
-        @param curr_hour:
-        @return:
-        """
-        if curr_hour.hour < 11:
-            return np.random.exponential(1 / 5)
-        elif 11 <= curr_hour.hour <= 14:
-            return np.random.exponential(1 / 10)
-        else:
-            return np.random.exponential(1 / 7)
-
-    @staticmethod
     def call_duration(client) -> float:
         """
         Depending on the client, randomize a call duration
@@ -200,7 +186,10 @@ class Probabilities:
         @param client:
         @return:
         """
-        if client.sector == 'Blue-Collar':
+        if client.sector == 'Restaurant':
+            return np.random.uniform(1, 2) * 60
+
+        elif client.sector == 'Blue-Collar':
 
             return np.random.uniform(2, 5) * 60  # Greater variance for blue collar
         else:

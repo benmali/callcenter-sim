@@ -1,5 +1,4 @@
 from .Client import Client
-from .Restaurant import Restaurant
 from .CustomerServiceAgent import CustomerServiceAgent
 from .CallQueue import CallQueue
 from .ChatQueue import ChatQueue

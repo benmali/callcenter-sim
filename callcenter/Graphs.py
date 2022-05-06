@@ -38,3 +38,14 @@ class Graphs:
         ax.hist(arrival_histogram)
         plt.bar(arrival_histogram.keys(), arrival_histogram.values())
         plt.show()
+
+    @staticmethod
+    def plot_rest_wait_histogram(wait_histogram):
+        fig, ax = plt.subplots(figsize=(7, 3))
+        ax.set_title('Number of rest vs Wait time (minutes)')
+        ax.set_xlabel('Wait time [Minutes]')
+        ax.set_ylabel('Number of rests')
+        ax.set_yticks(ticks=np.arange(0, 50, 5))
+        ax.hist(wait_histogram, bins=10)
+        plt.bar(wait_histogram.keys(), wait_histogram.values(),  width=0.1)
+        plt.show()
