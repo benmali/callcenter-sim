@@ -1,6 +1,8 @@
 import datetime
 from collections import defaultdict
-import decimal
+
+import numpy as np
+
 class Metrics:
     def __init__(self, metric_date: datetime.datetime):
         self.metric_date = metric_date
@@ -54,7 +56,7 @@ class Metrics:
         return dict(contact_reason)
 
     def get_rest_calls(self):
-        return [call for call in self.calls if call.client_type =='Restaurant']
+        return [call for call in self.calls if call.client_type == 'Restaurant']
 
     def get_rest_wait_histogram(self):
         """
@@ -66,4 +68,39 @@ class Metrics:
 
             rest_calls_hist[round(call.wait_time, 2)] += 1
         return rest_calls_hist
+
+    def system_state_hist_calls(self):
+        system_hist = {}
+        hours = []
+        people_in_system = []
+        for call in self.calls:
+            system_hist[call.arrival_time] = 1  # Mark arrival
+            system_hist[call.arrival_time + datetime.timedelta(seconds=call.service_time + call.wait_time)] = 0  # Mark leave
+        for i, system_event in enumerate(sorted(system_hist.items(), key=lambda x: x[0])):
+            if i == 0:
+                hours.append(system_event[0])
+                people_in_system.append(1)
+            else:
+                people_in_system.append(people_in_system[i-1] + 1 if system_event[1] == 1 else people_in_system[i-1] - 1)
+                hours.append(system_event[0])
+        hours.append(hours[-1] + datetime.timedelta(seconds=1))
+        return people_in_system, hours
+
+    def system_state_hist_chats(self):
+        system_hist = {}
+        hours = []
+        people_in_system = []
+        for chat in self.chats:
+            system_hist[chat.arrival_time] = 1  # Mark arrival
+            system_hist[chat.arrival_time + datetime.timedelta(seconds=chat.service_time + chat.wait_time)] = 0  # Mark leave
+        for i, system_event in enumerate(sorted(system_hist.items(), key=lambda x: x[0])):
+            if i == 0:
+                hours.append(system_event[0])
+                people_in_system.append(1)
+            else:
+                people_in_system.append(people_in_system[i-1] + 1 if system_event[1] == 1 else people_in_system[i-1] - 1)
+                hours.append(system_event[0])
+        hours.append(hours[-1] + datetime.timedelta(seconds=1))
+        return people_in_system, hours
+
 

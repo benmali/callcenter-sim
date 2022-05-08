@@ -143,7 +143,7 @@ class CallCenter:
                                                                                            self.n_rest_in_queue,
                                                                                            self.weather))
 
-        if np.random.uniform(0, 1) < 0.05:
+        if np.random.uniform(0, 1) < 0.03:
             hpq.heappush(self.events,
                          callcenter.Event(next_contact_time, 'incoming_call_or_chat',
                                           callcenter.Client(next_contact_time, 'Restaurant')))  # Push new rest arrival
@@ -340,8 +340,9 @@ class CallCenter:
             print(f"Chat reason breakdown: {self.day_metrics.get_contact_reason_breakdown('chat')}")
             Graphs.plot_arrival_histogram(self.day_metrics.arrival_histogram)
             Graphs.plot_rest_wait_histogram(self.day_metrics.get_rest_wait_histogram())
+            Graphs.plot_system_hist_calls(*self.day_metrics.system_state_hist_calls())
+            Graphs.plot_system_hist_chats(*self.day_metrics.system_state_hist_chats())
             # reset day
-            x = self.day_metrics.get_rest_calls()
             self.events = []
             self.curr_time = TimeHelper.set_next_day(self.curr_time)
 

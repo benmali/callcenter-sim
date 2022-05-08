@@ -217,9 +217,9 @@ class Probabilities:
         @return:
         """
         if client.sector == 'Blue-Collar':
-            return np.random.uniform(5, 13) * 60
+            return np.random.uniform(8, 20) * 60
         else:
-            return np.random.uniform(3, 10) * 60
+            return np.random.uniform(5, 15) * 60
 
     @staticmethod
     def agent_short_break():
