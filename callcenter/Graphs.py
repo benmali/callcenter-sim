@@ -51,6 +51,17 @@ class Graphs:
         plt.show()
 
     @staticmethod
+    def plot_client_wait_histogram(wait_histogram):
+        fig, ax = plt.subplots(figsize=(7, 3))
+        ax.set_title('Wait time (minutes) vs Number of clients')
+        ax.set_xlabel('Wait time [Minutes]')
+        ax.set_ylabel('Number of clients')
+        ax.set_yticks(ticks=np.arange(0, 1000, 50))
+        ax.hist(wait_histogram, bins=10)
+        plt.bar(wait_histogram.keys(), wait_histogram.values(),  width=0.1)
+        plt.show()
+
+    @staticmethod
     def plot_system_hist_calls(clients, hours):
         fig, ax = plt.subplots(figsize=(7, 3))
         ax.set_title('Hours of the day vs Clients in the system')

@@ -342,6 +342,7 @@ class CallCenter:
             Graphs.plot_rest_wait_histogram(self.day_metrics.get_rest_wait_histogram())
             Graphs.plot_system_hist_calls(*self.day_metrics.system_state_hist_calls())
             Graphs.plot_system_hist_chats(*self.day_metrics.system_state_hist_chats())
+            Graphs.plot_client_wait_histogram(self.day_metrics.get_client_call_wait_histogram())
             # reset day
             self.events = []
             self.curr_time = TimeHelper.set_next_day(self.curr_time)

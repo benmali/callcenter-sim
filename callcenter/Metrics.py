@@ -69,6 +69,20 @@ class Metrics:
             rest_calls_hist[round(call.wait_time, 2)] += 1
         return rest_calls_hist
 
+    def get_client_calls(self):
+        return [call for call in self.calls if call.client_type != 'Restaurant']
+
+    def get_client_call_wait_histogram(self):
+        """
+        Get number of rest waiting specific time
+        @return:
+        """
+        calls_hist = defaultdict(int)
+        for call in self.get_client_calls():
+            calls_hist[round(call.wait_time, 2)] += 1
+        return calls_hist
+
+
     def system_state_hist_calls(self):
         system_hist = {}
         hours = []

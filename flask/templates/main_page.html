@@ -7,5 +7,37 @@
 <body>
 <h3>Welcome</h3>
 <h2>Cibus Call Center Simulation</h2>
+<img src="/static/images/cibus.png ">
+
+
+    <table class="courses_table">
+        <form action="/run_simulation" method="POST">
+
+            <thead>
+                <tr>
+                    <td></td>
+                    <td>Parameters<td>
+                </tr>
+            </thead>
+
+            {% for param, value in params.items() %}
+            <tr>
+                <td>
+                <label for="{{ param }}">{{ param }}:</label>
+                <select name="{{ param }}" id="{{ param }}">
+                {% for option in value %}
+                    <option value="{{ option }}">{{ option }}</option>
+                {% endfor %}
+                </select>
+                </td>
+            </tr>
+            {% endfor %}
+
+            <tr>
+                <td><input type="submit" value="Submit"></td>
+                <td></td>
+            </tr>
+        </form>
+    </table>
 </body>
 </html>
