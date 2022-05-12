@@ -3,5 +3,5 @@ Call Rate,14/Hour
 Chat Rate,17/Hour
 Chat Duration,9min
 Call Duration,3min
-Number of Call Agents, 10
-Number of Chat Agents, 10
+Number of Call Agents,6,7,8,9,10,11,12,13,14,15,16
+Number of Chat Agents,6,7,8,9,10,11,12,13,14,15,16

@@ -2,9 +2,128 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>GetSim</title>
+    <style>
+body {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+
+}
+.middle {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  position: absolute;
+}
+.bar {
+  width: 10px;
+  height: 70px;
+  background: #fa8e57;
+  display: inline-block;
+  transform-origin: bottom center;
+  border-top-right-radius: 20px;
+  border-top-left-radius: 20px;
+  /*   box-shadow:5px 10px 20px inset rgba(255,23,25.2); */
+  animation: loader 1.2s linear infinite;
+}
+.bar1 {
+  animation-delay: 0.1s;
+}
+.bar2 {
+  animation-delay: 0.2s;
+}
+.bar3 {
+  animation-delay: 0.3s;
+}
+.bar4 {
+  animation-delay: 0.4s;
+}
+.bar5 {
+  animation-delay: 0.5s;
+}
+.bar6 {
+  animation-delay: 0.6s;
+}
+.bar7 {
+  animation-delay: 0.7s;
+}
+.bar8 {
+  animation-delay: 0.8s;
+}
+
+@keyframes loader {
+  0% {
+    transform: scaleY(0.1);
+    background: ;
+  }
+  50% {
+    transform: scaleY(1);
+    background: #ba185f;
+  }
+  100% {
+    transform: scaleY(0.1);
+    background: transparent;
+  }
+}
+    </style>
+
 </head>
-<body>
+<body align="center">
 <h2>Simulation Page</h2>
+<p>Simulating...</p>
+
+<div class="bottom">
+  <div class="bar bar1"></div>
+  <div class="bar bar2"></div>
+  <div class="bar bar3"></div>
+  <div class="bar bar4"></div>
+  <div class="bar bar5"></div>
+  <div class="bar bar6"></div>
+  <div class="bar bar7"></div>
+  <div class="bar bar8"></div>
+</div>
+
+
+<script defer type="text/javascript">
+
+function checkFileExist(urlToFile) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('HEAD', urlToFile, false);
+    xhr.send();
+
+    if (xhr.status == "404") {
+        return false;
+    } else {
+        return true;
+    }
+}
+
+function httpGet(theUrl)
+{
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.open( "GET", theUrl, false ); // false for synchronous request
+    xmlHttp.send( null );
+    //return xmlHttp.responseText;
+    document.write(xmlHttp.responseText);
+}
+
+async function renderSimPics() {
+
+    // Calling function
+    // set the path to check
+    var result = false;
+
+    // Define a template
+    while (result == false) {
+        var result = checkFileExist("/static/images/calls.png");
+        if (result == true){
+            //window.location.replace("https://127.0.0.1:5000/run_simulation");
+            httpGet("/run_simulation");
+        }
+    }
+}
+renderSimPics();
+</script>
 </body>
 </html>

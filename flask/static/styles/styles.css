@@ -197,11 +197,6 @@ label.with_shadow{
 }
 
 
-//label { /* class for styling the label of the checkboxes */
-  //font: 400 13px/1.7 'Merienda One', Helvetica, sans-serif;
-  //color: rgba(255,248,211,0.7);
-  //text-shadow: 3px 3px 3px black;
-//}
 label{
 color:black;}
 
@@ -324,3 +319,11 @@ margin-top:4%;
 margin-left:15%;
 }
 
+.center{
+    margin-right: auto;
+    margin-left: auto;
+    justify-content: center;
+    justify-self: center;
+    justify-items: center;
+
+}

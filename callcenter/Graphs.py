@@ -63,13 +63,15 @@ class Graphs:
 
     @staticmethod
     def plot_system_hist_calls(clients, hours):
-        fig, ax = plt.subplots(figsize=(7, 3))
+        fig, ax = plt.subplots(figsize=(7, 4))
         ax.set_title('Hours of the day vs Clients in the system')
         ax.set_xlabel('Hours of the day')
         ax.set_ylabel('Number of people in the system')
         ax.set_yticks(ticks=np.arange(0, 100, 2))
         plt.stairs(clients, hours)
+        plt.savefig('../flask/static/images/calls.png')
         plt.show()
+
 
     @staticmethod
     def plot_system_hist_chats(clients, hours):

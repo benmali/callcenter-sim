@@ -3,14 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <title>Cibus call center Simulation</title>
+    <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='styles/styles.css')}}">
 </head>
-<body>
-<h3>Welcome</h3>
+<body >
+<div class="center">
 <h2>Cibus Call Center Simulation</h2>
 <img src="/static/images/cibus.png ">
 
 
-    <table class="courses_table">
+    <table class="rg_table" >
         <form action="/run_simulation" method="POST">
 
             <thead>
@@ -39,5 +40,6 @@
             </tr>
         </form>
     </table>
+    </div>
 </body>
 </html>
