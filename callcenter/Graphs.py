@@ -29,7 +29,7 @@ class Graphs:
 
     @staticmethod
     def plot_arrival_histogram(arrival_histogram):
-        fig, ax = plt.subplots(figsize=(7, 3))
+        fig, ax = plt.subplots(figsize=(7, 4))
         ax.set_title('Hour of the day vs Number of clients arrivals')
         ax.set_ylabel('Number of clients')
         ax.set_xlabel('Hour of the day')
@@ -37,28 +37,31 @@ class Graphs:
         ax.set_yticks(ticks=np.arange(0, 600, 50))
         ax.hist(arrival_histogram)
         plt.bar(arrival_histogram.keys(), arrival_histogram.values())
+        plt.savefig('../flask/static/images/arrivals.png')
         plt.show()
 
     @staticmethod
     def plot_rest_wait_histogram(wait_histogram):
-        fig, ax = plt.subplots(figsize=(7, 3))
+        fig, ax = plt.subplots(figsize=(7, 4))
         ax.set_title('Number of rest vs Wait time (minutes)')
         ax.set_xlabel('Wait time [Minutes]')
         ax.set_ylabel('Number of rests')
         ax.set_yticks(ticks=np.arange(0, 50, 5))
         ax.hist(wait_histogram, bins=10)
         plt.bar(wait_histogram.keys(), wait_histogram.values(),  width=0.1)
+        plt.savefig('../flask/static/images/rest_wait.png')
         plt.show()
 
     @staticmethod
     def plot_client_wait_histogram(wait_histogram):
-        fig, ax = plt.subplots(figsize=(7, 3))
+        fig, ax = plt.subplots(figsize=(7, 4))
         ax.set_title('Wait time (minutes) vs Number of clients')
         ax.set_xlabel('Wait time [Minutes]')
         ax.set_ylabel('Number of clients')
         ax.set_yticks(ticks=np.arange(0, 1000, 50))
         ax.hist(wait_histogram, bins=10)
         plt.bar(wait_histogram.keys(), wait_histogram.values(),  width=0.1)
+        plt.savefig('../flask/static/images/client_wait.png')
         plt.show()
 
     @staticmethod
@@ -75,7 +78,7 @@ class Graphs:
 
     @staticmethod
     def plot_system_hist_chats(clients, hours):
-        fig, ax = plt.subplots(figsize=(7, 3))
+        fig, ax = plt.subplots(figsize=(7, 4))
         ax.set_title('Hours of the day vs Chats in the system')
         ax.set_xlabel('Hours of the day')
         ax.set_ylabel('Number of chats in the system')

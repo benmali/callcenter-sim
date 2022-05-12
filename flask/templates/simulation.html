@@ -55,7 +55,6 @@ body {
 @keyframes loader {
   0% {
     transform: scaleY(0.1);
-    background: ;
   }
   50% {
     transform: scaleY(1);
@@ -67,6 +66,7 @@ body {
   }
 }
     </style>
+
 
 </head>
 <body align="center">
@@ -84,8 +84,7 @@ body {
   <div class="bar bar8"></div>
 </div>
 
-
-<script defer type="text/javascript">
+ <script defer type="text/javascript">
 
 function checkFileExist(urlToFile) {
     var xhr = new XMLHttpRequest();
@@ -108,22 +107,18 @@ function httpGet(theUrl)
     document.write(xmlHttp.responseText);
 }
 
-async function renderSimPics() {
+function renderSimPics() {
 
-    // Calling function
-    // set the path to check
-    var result = false;
-
-    // Define a template
-    while (result == false) {
-        var result = checkFileExist("/static/images/calls.png");
+    var result = checkFileExist("/static/images/calls.png");
         if (result == true){
+            clearInterval(TheAce)
             //window.location.replace("https://127.0.0.1:5000/run_simulation");
             httpGet("/run_simulation");
         }
-    }
 }
-renderSimPics();
+TheAce = window.setInterval(renderSimPics,2500);
 </script>
+
+
 </body>
 </html>
