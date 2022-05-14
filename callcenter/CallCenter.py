@@ -54,7 +54,8 @@ class CallCenter:
         self.n_chat_agents = int(self.user_parameters.get("Number of Chat Agents"))
         self.n_call_agents = int(self.user_parameters.get("Number of Call Agents"))
         self.starting_number_of_agents = self.n_chat_agents + self.n_call_agents
-
+        Probabilities.client_patience_ex = float(self.user_parameters.get("Client Patience ~ E(X)"))
+        Probabilities.client_patience_var = float(self.user_parameters.get("Client Patience ~ V(X)"))
         if self.mode == 'SeparatePool':
             percentage_of_rest_agents = 0.2  # 20% of the agents will answer calls from restaurants
             self.n_rest_agents = math.ceil(

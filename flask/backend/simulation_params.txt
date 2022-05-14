@@ -6,5 +6,5 @@ Call Duration ~ E(X),3min,4min,5min,6min,7min,8min,9min,10min,11min,12min,13min
 Call Variance ~ V(X),0.5min,1min,1.5min,2min,2.5min,3min,3.5min,4min
 Number of Call Agents,4,5,6,7,8,9,10,11,12,13,14,15,16
 Number of Chat Agents,4,5,6,7,8,9,10,11,12,13,14,15,16
-Client Patience ~ E(X),10,11,12,13,14,15
+Client Patience ~ E(X),1,2,3,5,6,7,8,9,10,11,12,13,14,15
 Client Patience ~ V(X),0.5,1,1.5,2,2.5,3,3.5,4

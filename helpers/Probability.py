@@ -12,23 +12,26 @@ import numpy as np
 import randomname
 
 
-
 class Probabilities:
     """
     Given specific parameters, return a probability for an event to occur
     """
+    client_patience_ex = None
+    client_patience_var = None
 
     def __init__(self, time_of_day, date: datetime.datetime):
         self.time_of_day = time_of_day
         self.date = date
 
     @staticmethod
-    def max_client_patience(expected=10.0, variance=1.5) -> datetime.timedelta:
+    def max_client_patience() -> datetime.timedelta:
         """
         Generate amount of time, if the client has to wait more than that time, abandon the queue
         Assuming client type and client sector are not correlated
         @return: max_wait_time:maximum wait time a client is willing to wait for a service before abandoning the queue
         """
+        expected = Probabilities.client_patience_ex
+        variance = Probabilities.client_patience_var
         max_wait_time = datetime.timedelta(minutes=np.random.normal(expected, variance))
         return max_wait_time
 
@@ -175,8 +178,6 @@ class Probabilities:
             return np.random.exponential(1 / (20 * weather_factor * 1.02 ** rest_queue_len))
 
         else:
-            n_arrivals = 120
-
             return np.random.exponential(1 / 35)
 
     @staticmethod
