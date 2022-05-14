@@ -1,7 +1,10 @@
 Weather,Sunny,Rainy
-Call Rate,14/Hour
-Chat Rate,17/Hour
-Chat Duration,9min
-Call Duration,3min
-Number of Call Agents,6,7,8,9,10,11,12,13,14,15,16
-Number of Chat Agents,6,7,8,9,10,11,12,13,14,15,16
+Contact Rate,250/Hour
+Chat Duration ~ E(X),5min,6min,7min,8min,9min,10min,11min,12min,13min
+Chat Variance ~ V(X),0.5min,1min,1.5min,2min,2.5min,3min,3.5min,4min
+Call Duration ~ E(X),3min,4min,5min,6min,7min,8min,9min,10min,11min,12min,13min
+Call Variance ~ V(X),0.5min,1min,1.5min,2min,2.5min,3min,3.5min,4min
+Number of Call Agents,4,5,6,7,8,9,10,11,12,13,14,15,16
+Number of Chat Agents,4,5,6,7,8,9,10,11,12,13,14,15,16
+Client Patience ~ E(X),10,11,12,13,14,15
+Client Patience ~ V(X),0.5,1,1.5,2,2.5,3,3.5,4

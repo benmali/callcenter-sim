@@ -12,24 +12,24 @@ import numpy as np
 import randomname
 
 
+
 class Probabilities:
     """
     Given specific parameters, return a probability for an event to occur
     """
 
-    def __init__(self, time_of_day, date: datetime.datetime, is_holiday=False):
+    def __init__(self, time_of_day, date: datetime.datetime):
         self.time_of_day = time_of_day
         self.date = date
-        self.is_holiday = is_holiday
 
     @staticmethod
-    def max_client_patience() -> datetime.timedelta:
+    def max_client_patience(expected=10.0, variance=1.5) -> datetime.timedelta:
         """
         Generate amount of time, if the client has to wait more than that time, abandon the queue
         Assuming client type and client sector are not correlated
         @return: max_wait_time:maximum wait time a client is willing to wait for a service before abandoning the queue
         """
-        max_wait_time = datetime.timedelta(minutes=np.random.normal(10.0, 1.5))
+        max_wait_time = datetime.timedelta(minutes=np.random.normal(expected, variance))
         return max_wait_time
 
     @staticmethod
@@ -133,9 +133,11 @@ class Probabilities:
         Formula is x ~ Pois(100) (100 clients/ 1 hour) -> x ~ Exp(1 / 100) (time between clients, in hours)
         We assume the more restaurants in the queue, generates 2% per restaurant
         Therefore we multiply the arrival rate by 1.02 * times the restaurants in queue
-        @param curr_hour:
-        @return:
+        @param weather: rainy or sunny
+        @param curr_hour: datetime of cuurent hour
+        @return: return time between arrivals (hours)
         """
+
         if weather == 'rainy':
             weather_factor = 1.3
         else:
@@ -239,26 +241,6 @@ class Probabilities:
         probability = np.random.uniform(0, 1)
         return probability < 0.06
 
-    def weather_probabilities(self):
-        """
-        We assess these probabilities from statistics we gather
-        You can replace this with real ones, with a more fined grained resolution (probability per day for example)
-        """
-        months_rain_probabilities = {
-            "01": 0.35,
-            "02": 0.20,
-            "03": 0.10,
-            "04": 0.02,
-            "05": 0.001,
-            "06": 0.001,
-            "07": 0.001,
-            "08": 0.0001,
-            "09": 0.05,
-            "10": 0.15,
-            "11": 0.25,
-            "12": 0.35
-        }
-        return months_rain_probabilities[self.date.strftime("%m")]
 
 
 if __name__ == "__main__":

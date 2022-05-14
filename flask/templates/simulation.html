@@ -112,7 +112,6 @@ function renderSimPics() {
     var result = checkFileExist("/static/images/calls.png");
         if (result == true){
             clearInterval(TheAce)
-            //window.location.replace("https://127.0.0.1:5000/run_simulation");
             httpGet("/run_simulation");
         }
 }

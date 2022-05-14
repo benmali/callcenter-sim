@@ -3,43 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <title>Cibus call center Simulation</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='styles/styles.css')}}">
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    <style>
+        body {
+
+        }
+
+    </style>
 </head>
-<body >
-<div class="center">
-<h2>Cibus Call Center Simulation</h2>
-<img src="/static/images/cibus.png ">
+<body>
+<div class="center_element">
+    <h2>Cibus Call Center Simulation</h2>
+    <br><br>
+    <img src="/static/images/cibus-removebg.png">
+        <table>
+            <form action="/run_simulation" method="POST">
 
+                <thead>
+                    <tr>
+                        <td></td>
+                        <td>Parameters<td>
+                    </tr>
+                </thead>
 
-    <table class="rg_table" >
-        <form action="/run_simulation" method="POST">
-
-            <thead>
+                {% for param, value in params.items() %}
                 <tr>
-                    <td></td>
-                    <td>Parameters<td>
+                    <td>
+                    <label for="{{ param }}">{{ param }}:</label>
+                    <select name="{{ param }}" id="{{ param }}">
+                    {% for option in value %}
+                        <option value="{{ option }}">{{ option }}</option>
+                    {% endfor %}
+                    </select>
+                    </td>
                 </tr>
-            </thead>
-
-            {% for param, value in params.items() %}
-            <tr>
-                <td>
-                <label for="{{ param }}">{{ param }}:</label>
-                <select name="{{ param }}" id="{{ param }}">
-                {% for option in value %}
-                    <option value="{{ option }}">{{ option }}</option>
                 {% endfor %}
-                </select>
-                </td>
-            </tr>
-            {% endfor %}
 
-            <tr>
-                <td><input type="submit" value="Submit"></td>
-                <td></td>
-            </tr>
-        </form>
-    </table>
+                <tr>
+                    <td><input class="btn btn-light" type="submit" value="Submit"></td>
+                    <!--<td><input type="submit" value="Submit"></td>-->
+                    <td></td>
+                </tr>
+            </form>
+        </table>
     </div>
 </body>
 </html>

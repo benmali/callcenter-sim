@@ -1,0 +1,11 @@
+{
+    "Weather": "Sunny",
+    "Call Rate": "14/Hour",
+    "Chat Rate": "17/Hour",
+    "Chat Duration": "9min",
+    "Call Duration": "3min",
+    "Number of Call Agents": "5",
+    "Number of Chat Agents": "4",
+    "Client Patience ~ E(X)": "10",
+    "Client Patience ~ V(X)": "0.5"
+}

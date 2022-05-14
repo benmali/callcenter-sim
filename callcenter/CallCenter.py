@@ -7,6 +7,7 @@ import heapq as hpq
 import datetime
 import logging
 import sys
+import json
 
 logging.basicConfig(
     level=logging.INFO,
@@ -45,13 +46,14 @@ class CallCenter:
         self.closing_hour = TimeHelper.string_to_hour('23:00:00')
         self.n_restaurants = 1_000
         self.mode = mode  # PriorityQueue, SeparatePool, Regular
-        self.call_load_ratio = None  # queue size / number of agents assigned to calls
-        self.chat_load_ratio = None  # queue size / number of agents assigned to chats
-        self.starting_number_of_agents = number_of_agents
         self.call_queue = CallQueue(self.mode)
         self.chat_queue = ChatQueue(self.mode)
         self.n_rest_in_queue = 0
-        self.weather = weather
+        self.user_parameters = self._read_user_parameters()
+        self.weather = self.user_parameters.get("Weather").lower()
+        self.n_chat_agents = int(self.user_parameters.get("Number of Chat Agents"))
+        self.n_call_agents = int(self.user_parameters.get("Number of Call Agents"))
+        self.starting_number_of_agents = self.n_chat_agents + self.n_call_agents
 
         if self.mode == 'SeparatePool':
             percentage_of_rest_agents = 0.2  # 20% of the agents will answer calls from restaurants
@@ -143,7 +145,7 @@ class CallCenter:
                                                                                            self.n_rest_in_queue,
                                                                                            self.weather))
 
-        if np.random.uniform(0, 1) < 0.03:
+        if np.random.uniform(0, 1) < 0.03:  # 3% are rests
             hpq.heappush(self.events,
                          callcenter.Event(next_contact_time, 'incoming_call_or_chat',
                                           callcenter.Client(next_contact_time, 'Restaurant')))  # Push new rest arrival
@@ -221,6 +223,19 @@ class CallCenter:
                                           client, agent))  # Push new arrival
         else:
             logger.debug(f"{agent} returned from a break and queue is empty")
+
+    def _read_user_parameters(self) -> dict:
+        """
+        Read the parameters JSON the user created and use the paramters in the simulation with them
+        @return: dict
+        """
+        try:
+            with open("../callcenter/user_parameters.json") as f:
+                user_params = json.load(f)
+            return user_params
+        except Exception as e:
+            logger.exception(e)
+            return {}
 
     def rest_end_ingredient(self, event):
         """
