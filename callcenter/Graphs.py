@@ -34,7 +34,7 @@ class Graphs:
         ax.set_ylabel('Number of clients')
         ax.set_xlabel('Hour of the day')
         ax.set_xticks(ticks=list(arrival_histogram.keys()))
-        ax.set_yticks(ticks=np.arange(0, 600, 50))
+        ax.set_yticks(ticks=np.arange(0, 1000, 50))
         ax.hist(arrival_histogram)
         plt.bar(arrival_histogram.keys(), arrival_histogram.values())
         plt.savefig('../flask/static/images/arrivals.png')

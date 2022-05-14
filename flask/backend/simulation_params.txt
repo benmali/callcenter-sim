@@ -1,4 +1,5 @@
 Weather,Sunny,Rainy
+Rain Factor,1.1,1.2,1.3,1.4,1.5,1.6,1.7,1.8,1.9,2,2.1,2.1,2.2,2.3,2.4,2.5
 Contact Rate,250/Hour
 Chat Duration ~ E(X),5min,6min,7min,8min,9min,10min,11min,12min,13min
 Chat Variance ~ V(X),0.5min,1min,1.5min,2min,2.5min,3min,3.5min,4min

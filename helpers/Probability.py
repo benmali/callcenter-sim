@@ -18,6 +18,7 @@ class Probabilities:
     """
     client_patience_ex = None
     client_patience_var = None
+    rain_factor = 1.3
 
     def __init__(self, time_of_day, date: datetime.datetime):
         self.time_of_day = time_of_day
@@ -142,7 +143,7 @@ class Probabilities:
         """
 
         if weather == 'rainy':
-            weather_factor = 1.3
+            weather_factor = Probabilities.rain_factor
         else:
             weather_factor = 1
 
