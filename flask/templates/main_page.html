@@ -20,20 +20,17 @@
 <body>
 <div class="center_element" style="background-color: transparent;justify-content: center;">
     <h2>Cibus Call Center Simulation</h2>
-    <br><br>
+    <br>
     <img src="/static/images/cibus-removebg.png">
 </div>
-<br><br>
+<div class="center_element" style="background-color: transparent;justify-content: center;">
+    <h3>Parameters</h3>
+    <br>
+</div>
+<br>
 <div class="d-flex justify-content-center" style="background-color: transparent;">
         <table>
             <form action="/run_simulation" method="POST">
-
-                <thead>
-                    <tr>
-                        <td></td>
-                        <td>Parameters<td>
-                    </tr>
-                </thead>
 
                 {% for param, value in params.items() %}
                 <tr class="spaceUnder">
