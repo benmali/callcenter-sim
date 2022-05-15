@@ -3,12 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <title>GetSim</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='styles/styles.css')}}">
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
     <style>
 body {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-
+  background-image: url("/static/images/bg4.png");
+  color: white;
 }
 .middle {
   top: 50%;
@@ -69,11 +73,17 @@ body {
 
 
 </head>
-<body align="center">
+<body>
+<div class="d-flex justify-content-center">
 <h2>Simulation Page</h2>
-<p>Simulating...</p>
 
-<div class="bottom">
+</div>
+<br><br>
+<div class="d-flex justify-content-center">
+    <h4>Simulating...</h4>
+</div>
+
+<div class="d-flex justify-content-center">
   <div class="bar bar1"></div>
   <div class="bar bar2"></div>
   <div class="bar bar3"></div>

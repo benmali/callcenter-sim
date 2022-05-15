@@ -319,9 +319,12 @@ margin-top:4%;
 margin-left:15%;
 }
 
-.center{
-    margin-right: auto;
-    margin-left: auto;
+tr.spaceUnder>td {
+  padding-bottom: 1em;
+}
+
+.center_e{
+    margin: 0px auto;
     justify-content: center;
     justify-self: center;
     justify-items: center;
