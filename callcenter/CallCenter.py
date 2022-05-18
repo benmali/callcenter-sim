@@ -37,7 +37,7 @@ logger = logging.getLogger('CallCenter')
 
 
 class CallCenter:
-    def __init__(self, weather='sunny',  mode: str = "PriorityQueue", number_of_agents: int = 10,):
+    def __init__(self, mode: str = "PriorityQueue"):
         self.events = []
         self.metrics_list = []
         self.day_metrics = None
@@ -366,5 +366,5 @@ class CallCenter:
 
 
 if __name__ == "__main__":
-    cc = CallCenter()
+    cc = CallCenter('Regular')
     cc.run()
