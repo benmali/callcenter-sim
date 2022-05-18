@@ -49,6 +49,7 @@ class CallCenter:
         self.call_queue = CallQueue(self.mode)
         self.chat_queue = ChatQueue(self.mode)
         self.n_rest_in_queue = 0
+        self.rest_call_proportion = 0.03  # 3% of all calls belong to restaurants
         self.user_parameters = self._read_user_parameters()
         self.weather = self.user_parameters.get("Weather").lower()
         self.n_chat_agents = int(self.user_parameters.get("Number of Chat Agents"))
@@ -147,7 +148,7 @@ class CallCenter:
                                                                                            self.n_rest_in_queue,
                                                                                            self.weather))
 
-        if np.random.uniform(0, 1) < 0.03:  # 3% are rests
+        if np.random.uniform(0, 1) < self.rest_call_proportion:  # proportion of restaurants call out of all calls
             hpq.heappush(self.events,
                          callcenter.Event(next_contact_time, 'incoming_call_or_chat',
                                           callcenter.Client(next_contact_time, 'Restaurant')))  # Push new rest arrival
@@ -180,6 +181,7 @@ class CallCenter:
         # Agent is not going for a break
         else:
             queue = agent.task_assigned  # assigned to call or chat
+            sub_queue = agent
             pulled_valid_client = False
             while not self.queue_map[queue].is_empty():  # Pull another client if queue isn't empty
                 logger.debug(f"{agent} {agent.task_assigned} end - trying to pull another client {self.curr_time}")
@@ -228,7 +230,7 @@ class CallCenter:
 
     def _read_user_parameters(self) -> dict:
         """
-        Read the parameters JSON the user created and use the paramters in the simulation with them
+        Read the parameters JSON the user created and use the parameters in the simulation with them
         @return: dict
         """
         try:
@@ -366,5 +368,5 @@ class CallCenter:
 
 
 if __name__ == "__main__":
-    cc = CallCenter('Regular')
+    cc = CallCenter('SeparatePool')
     cc.run()
