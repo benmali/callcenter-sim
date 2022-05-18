@@ -1,12 +1,12 @@
 {
-    "Weather": "Sunny",
-    "Rain Factor": "1.1",
+    "Weather": "Rainy",
+    "Rain Factor": "2.1",
     "Contact Rate": "250/Hour",
     "Chat Duration ~ E(X)": "5min",
     "Chat Variance ~ V(X)": "0.5min",
     "Call Duration ~ E(X)": "3min",
     "Call Variance ~ V(X)": "0.5min",
-    "Number of Call Agents": "4",
+    "Number of Call Agents": "8",
     "Number of Chat Agents": "4",
     "Client Patience ~ E(X)": "1",
     "Client Patience ~ V(X)": "0.5"

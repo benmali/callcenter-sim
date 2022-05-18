@@ -16,6 +16,7 @@
     }
 
     </style>
+
 </head>
 <body>
 <div class="center_element" style="background-color: transparent;justify-content: center;">
@@ -35,16 +36,19 @@
                 {% for param, value in params.items() %}
                 <tr class="spaceUnder">
                     <td>
-                    <label style="color: white" for="{{ param }}">{{ param }}:</label>
-                    <select class="custom-select" name="{{ param }}" id="{{ param }}">
-                    {% for option in value %}
-                        <option value="{{ option }}">{{ option }}</option>
-                    {% endfor %}
-                    </select>
+                        <label style="color: white" for="{{ param }}">{{ param }}:</label>
+                        {%- if ( (param == 'Blue-Collar Employees') or (param == 'High-Tech Employees') ) -%}
+                            <input type="number" id="{{ param }}" name="{{ param }}" class="form-control" pattern="\d+" >
+                        {% else %}
+                        <select class="custom-select" name="{{ param }}" id="{{ param }}">
+                            {% for option in value %}
+                                <option value="{{ option }}">{{ option }}</option>
+                            {% endfor %}
+                        </select>
+                        {% endif %}
                     </td>
                 </tr>
                 {% endfor %}
-
                 <tr>
                     <td><input class="btn btn-light" type="submit" value="Submit"></td>
                     <!--<td><input type="submit" value="Submit"></td>-->
