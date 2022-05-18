@@ -216,6 +216,7 @@ class CallCenter:
         logger.debug(f"{agent} returned from a break at {self.curr_time}")
         agent.return_from_break()
         queue = agent.task_assigned  # assigned to call or chat
+        sub_queue = "x"
         if not self.queue_map[queue].is_empty():  # Pull another client if queue isn't empty
             client = self.queue_map[queue].dequeue(queue)
             contact_duration = agent.handle_client(client)
