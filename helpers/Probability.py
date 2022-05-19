@@ -131,14 +131,14 @@ class Probabilities:
             pass
 
     @staticmethod
-    def contact_rate(curr_hour: datetime.datetime, rest_queue_len: int, weather=None):
+    def contact_rate(curr_hour: datetime.datetime, rest_queue_len: int, n_high_tech:int, n_industry:int, weather=None):
         """
         Return the time between calls depending on the hour of the day
         Formula is x ~ Pois(100) (100 clients/ 1 hour) -> x ~ Exp(1 / 100) (time between clients, in hours)
         We assume the more restaurants in the queue, generates 2% per restaurant
         Therefore we multiply the arrival rate by 1.02 * times the restaurants in queue
         @param weather: rainy or sunny
-        @param curr_hour: datetime of cuurent hour
+        @param curr_hour: datetime of current hour
         @return: return time between arrivals (hours)
         """
 
@@ -147,39 +147,15 @@ class Probabilities:
         else:
             weather_factor = 1
 
-        if curr_hour.hour == 8:
-            return np.random.exponential(1 / (10 * weather_factor * 1.02 ** rest_queue_len))
-        elif curr_hour.hour == 9:
-            return np.random.exponential(1 / (75 * weather_factor * 1.02 ** rest_queue_len))
-        elif curr_hour.hour == 10:
-            return np.random.exponential(1 / (175 * weather_factor * 1.02 ** rest_queue_len))
-        elif curr_hour.hour == 11:
-            return np.random.exponential(1 / (250 * weather_factor * 1.02 ** rest_queue_len))
-        elif curr_hour.hour == 12:
-            return np.random.exponential(1 / (300 * weather_factor * 1.02 ** rest_queue_len))
-        elif curr_hour.hour == 13:
-            return np.random.exponential(1 / (400 * weather_factor * 1.02 ** rest_queue_len))
-        elif curr_hour.hour == 14:
-            return np.random.exponential(1 / (430 * weather_factor * 1.02 ** rest_queue_len))
-        elif curr_hour.hour == 15:
-            return np.random.exponential(1 / (200 * weather_factor * 1.02 ** rest_queue_len))
-        elif curr_hour.hour == 16:
-            return np.random.exponential(1 / (130 * weather_factor * 1.02 ** rest_queue_len))
-        elif curr_hour.hour == 17:
-            return np.random.exponential(1 / (90 * weather_factor * 1.02 ** rest_queue_len))
-        elif curr_hour.hour == 18:
-            return np.random.exponential(1 / (75 * weather_factor * 1.02 ** rest_queue_len))
-        elif curr_hour.hour == 19:
-            return np.random.exponential(1 / (60 * weather_factor * 1.02 ** rest_queue_len))
-        elif curr_hour.hour == 20:
-            return np.random.exponential(1 / (45 * weather_factor * 1.02 ** rest_queue_len))
-        elif curr_hour.hour == 21:
-            return np.random.exponential(1 / (35 * weather_factor * 1.02 ** rest_queue_len))
-        elif curr_hour.hour == 22:
-            return np.random.exponential(1 / (20 * weather_factor * 1.02 ** rest_queue_len))
-
-        else:
-            return np.random.exponential(1 / 35)
+        # (n_ht * 0.02 + n_w*0.05) * hour_factor = base_rate
+        # n_high_tech = 60_000
+        # n_industry = 40_000
+        hightech_prop = 0.02
+        industry_prop = 0.05
+        hour_factors = [320, 42.6, 18.28, 14.5, 12.3, 9.19, 8.64, 16, 24.61, 35.5, 45.71, 53.3, 71.1, 91.42, 160, 250]
+        h_factor_map = {hour: hour_factors[i] for i, hour in enumerate(range(8, 24))}
+        base_rate = (n_high_tech * hightech_prop + n_industry * industry_prop) / h_factor_map[curr_hour.hour]
+        return np.random.exponential(1 / (base_rate * weather_factor * 1.02 ** rest_queue_len))
 
     @staticmethod
     def call_duration(client) -> float:
@@ -195,21 +171,11 @@ class Probabilities:
 
         elif client.sector == 'Blue-Collar':
 
-            return np.random.uniform(2, 5) * 60  # Greater variance for blue collar
+            #return np.random.uniform(2, 5) * 60  # Greater variance for blue collar
+            return np.random.normal(3.5 * 60, 60)
         else:
-            return np.random.uniform(2, 3) * 60
-
-    @staticmethod
-    def contact_duration(client):
-        """
-        Return the duration of the call or chat with the call center
-        @param client: Client or Restaurant
-        @return:
-        """
-        if client.contact_method == "call":
-            return Probabilities.call_duration(client)
-        else:
-            return Probabilities.chat_duration(client)
+            return np.random.normal(2.5 * 60, 60)
+            #return np.random.uniform(2, 3) * 60
 
     @staticmethod
     def chat_duration(client) -> float:
@@ -221,9 +187,11 @@ class Probabilities:
         @return:
         """
         if client.sector == 'Blue-Collar':
-            return np.random.uniform(8, 20) * 60
+            return np.random.normal(12 * 60, 240)
+            #return np.random.uniform(8, 20) * 60
         else:
-            return np.random.uniform(5, 15) * 60
+            return np.random.normal(9 * 60, 240)
+            #return np.random.uniform(5, 15) * 60
 
     @staticmethod
     def agent_short_break():
@@ -242,8 +210,6 @@ class Probabilities:
         """
         probability = np.random.uniform(0, 1)
         return probability < 0.06
-
-
 
 if __name__ == "__main__":
     # my_date = datetime.datetime(2019, 12, 12)

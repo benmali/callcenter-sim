@@ -37,19 +37,24 @@ logger = logging.getLogger('CallCenter')
 
 
 class CallCenter:
-    def __init__(self, weather='sunny',  mode: str = "PriorityQueue", number_of_agents: int = 10,):
+    def __init__(self, mode: str = "PriorityQueue"):
         self.events = []
         self.metrics_list = []
         self.day_metrics = None
+        self.user_parameters = self._read_user_parameters()
+        sim_mode = self.user_parameters.get("Simulation Mode")
+        sim_map = {'Regular': 'Regular', "Separate Queues": "SeparatePool", "Priority Queue": "PriorityQueue"}
+        self.mode = sim_map[sim_mode]  # PriorityQueue, SeparatePool, Regular
+        self.n_high_tech_employees = int(self.user_parameters.get("High-Tech Employees"))
+        self.n_industry_employees = int(self.user_parameters.get("Industry Employees"))
         self.curr_time = TimeHelper.string__to_full_time('01-01-2021 08:00:00')
         self.opening_hour = TimeHelper.string_to_hour('08:00:00')
         self.closing_hour = TimeHelper.string_to_hour('23:00:00')
         self.n_restaurants = 1_000
-        self.mode = mode  # PriorityQueue, SeparatePool, Regular
         self.call_queue = CallQueue(self.mode)
         self.chat_queue = ChatQueue(self.mode)
         self.n_rest_in_queue = 0
-        self.user_parameters = self._read_user_parameters()
+        self.rest_call_proportion = 0.03  # 3% of all calls belong to restaurants
         self.weather = self.user_parameters.get("Weather").lower()
         self.n_chat_agents = int(self.user_parameters.get("Number of Chat Agents"))
         self.n_call_agents = int(self.user_parameters.get("Number of Call Agents"))
@@ -145,6 +150,8 @@ class CallCenter:
         # # Generate new chats and call arrivals
         next_contact_time = self.curr_time + datetime.timedelta(hours=Probabilities.contact_rate(self.curr_time,
                                                                                            self.n_rest_in_queue,
+                                                                                           self.n_high_tech_employees,
+                                                                                           self.n_industry_employees,
                                                                                            self.weather))
 
         if np.random.uniform(0, 1) < 0.03:  # 3% are rests
