@@ -146,7 +146,8 @@ class Probabilities:
             weather_factor = Probabilities.rain_factor
         else:
             weather_factor = 1
-
+        # TODO - Include in this formula the number of employees
+        # ((0.3 * n_bc + 0.12 * n_ht) * hour_factor) => 10
         if curr_hour.hour == 8:
             return np.random.exponential(1 / (10 * weather_factor * 1.02 ** rest_queue_len))
         elif curr_hour.hour == 9:
