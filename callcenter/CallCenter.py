@@ -41,17 +41,20 @@ class CallCenter:
         self.events = []
         self.metrics_list = []
         self.day_metrics = None
+        self.user_parameters = self._read_user_parameters()
+        sim_mode = self.user_parameters.get("Simulation Mode")
+        sim_map = {'Regular': 'Regular', "Separate Queues": "SeparatePool", "Priority Queue": "PriorityQueue"}
+        self.mode = sim_map[sim_mode]  # PriorityQueue, SeparatePool, Regular
         self.curr_time = TimeHelper.string__to_full_time('01-01-2021 08:00:00')
         self.opening_hour = TimeHelper.string_to_hour('08:00:00')
         self.closing_hour = TimeHelper.string_to_hour('23:00:00')
         self.n_restaurants = 1_000
-        self.mode = mode  # PriorityQueue, SeparatePool, Regular
         self.call_queue = CallQueue(self.mode)
         self.chat_queue = ChatQueue(self.mode)
         self.n_rest_in_queue = 0
         self.rest_call_proportion = 0.03  # 3% of all calls belong to restaurants
-        self.user_parameters = self._read_user_parameters()
         self.weather = self.user_parameters.get("Weather").lower()
+
         self.n_chat_agents = int(self.user_parameters.get("Number of Chat Agents"))
         self.n_call_agents = int(self.user_parameters.get("Number of Call Agents"))
         self.starting_number_of_agents = self.n_chat_agents + self.n_call_agents
@@ -181,11 +184,16 @@ class CallCenter:
         # Agent is not going for a break
         else:
             queue = agent.task_assigned  # assigned to call or chat
-            sub_queue = agent
             pulled_valid_client = False
-            while not self.queue_map[queue].is_empty():  # Pull another client if queue isn't empty
+            sub_queue = None
+            if self.mode == "SeparatePool":
+                if agent in self.end_service_agents:
+                    sub_queue = 'clients'
+                else:
+                    sub_queue = 'restaurants'
+            while not self.queue_map[queue].is_empty(sub_queue):  # Pull another client if queue isn't empty
                 logger.debug(f"{agent} {agent.task_assigned} end - trying to pull another client {self.curr_time}")
-                client = self.queue_map[queue].dequeue(queue)
+                client = self.queue_map[queue].dequeue(sub_queue)
                 if self.curr_time - client.arrival_time > client.max_wait_time:
                     client.abandon_queue()
                     client_data = client.get_metrics()
@@ -216,9 +224,14 @@ class CallCenter:
         logger.debug(f"{agent} returned from a break at {self.curr_time}")
         agent.return_from_break()
         queue = agent.task_assigned  # assigned to call or chat
-        sub_queue = "x"
-        if not self.queue_map[queue].is_empty():  # Pull another client if queue isn't empty
-            client = self.queue_map[queue].dequeue(queue)
+        sub_queue = None
+        if self.mode == "SeparatePool":
+            if agent in self.end_service_agents:
+                sub_queue = 'clients'
+            else:
+                sub_queue = 'restaurants'
+        if not self.queue_map[queue].is_empty(sub_queue):  # Pull another client if queue isn't empty
+            client = self.queue_map[queue].dequeue(sub_queue)
             contact_duration = agent.handle_client(client)
             logger.info(f"{agent} answering {client.contact_method} at {self.curr_time}")
             client.update_metrics(self.curr_time, contact_duration)
@@ -249,7 +262,6 @@ class CallCenter:
         Clients order this and their food wont arrive
         @return:
         """
-        pass
         # Generate next restaurant call
         rest = callcenter.Client(self.curr_time, 'Restaurant')
         hpq.heappush(self.events,
@@ -369,5 +381,5 @@ class CallCenter:
 
 
 if __name__ == "__main__":
-    cc = CallCenter('SeparatePool')
+    cc = CallCenter()
     cc.run()

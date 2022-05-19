@@ -154,13 +154,13 @@ class Probabilities:
         elif curr_hour.hour == 10:
             return np.random.exponential(1 / (175 * weather_factor * 1.02 ** rest_queue_len))
         elif curr_hour.hour == 11:
-            return np.random.exponential(1 / (250 * weather_factor * 1.02 ** rest_queue_len))
+            return np.random.exponential(1 / (220 * weather_factor * 1.02 ** rest_queue_len))
         elif curr_hour.hour == 12:
-            return np.random.exponential(1 / (300 * weather_factor * 1.02 ** rest_queue_len))
+            return np.random.exponential(1 / (260 * weather_factor * 1.02 ** rest_queue_len))
         elif curr_hour.hour == 13:
-            return np.random.exponential(1 / (400 * weather_factor * 1.02 ** rest_queue_len))
+            return np.random.exponential(1 / (348 * weather_factor * 1.02 ** rest_queue_len))
         elif curr_hour.hour == 14:
-            return np.random.exponential(1 / (430 * weather_factor * 1.02 ** rest_queue_len))
+            return np.random.exponential(1 / (370 * weather_factor * 1.02 ** rest_queue_len))
         elif curr_hour.hour == 15:
             return np.random.exponential(1 / (200 * weather_factor * 1.02 ** rest_queue_len))
         elif curr_hour.hour == 16:
@@ -168,7 +168,7 @@ class Probabilities:
         elif curr_hour.hour == 17:
             return np.random.exponential(1 / (90 * weather_factor * 1.02 ** rest_queue_len))
         elif curr_hour.hour == 18:
-            return np.random.exponential(1 / (75 * weather_factor * 1.02 ** rest_queue_len))
+            return np.random.exponential(1 / (70 * weather_factor * 1.02 ** rest_queue_len))
         elif curr_hour.hour == 19:
             return np.random.exponential(1 / (60 * weather_factor * 1.02 ** rest_queue_len))
         elif curr_hour.hour == 20:
@@ -195,21 +195,11 @@ class Probabilities:
 
         elif client.sector == 'Blue-Collar':
 
-            return np.random.uniform(2, 5) * 60  # Greater variance for blue collar
+            #return np.random.uniform(2, 5) * 60  # Greater variance for blue collar
+            return np.random.normal(3.5 * 60, 60)
         else:
-            return np.random.uniform(2, 3) * 60
-
-    @staticmethod
-    def contact_duration(client):
-        """
-        Return the duration of the call or chat with the call center
-        @param client: Client or Restaurant
-        @return:
-        """
-        if client.contact_method == "call":
-            return Probabilities.call_duration(client)
-        else:
-            return Probabilities.chat_duration(client)
+            return np.random.normal(2.5 * 60, 60)
+            #return np.random.uniform(2, 3) * 60
 
     @staticmethod
     def chat_duration(client) -> float:
@@ -221,9 +211,11 @@ class Probabilities:
         @return:
         """
         if client.sector == 'Blue-Collar':
-            return np.random.uniform(8, 20) * 60
+            return np.random.normal(12 * 60, 240)
+            #return np.random.uniform(8, 20) * 60
         else:
-            return np.random.uniform(5, 15) * 60
+            return np.random.normal(9 * 60, 240)
+            #return np.random.uniform(5, 15) * 60
 
     @staticmethod
     def agent_short_break():

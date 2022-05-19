@@ -8,11 +8,17 @@ class Queue:
         self.queue_map = {'clients': self.clients,
                           'restaurants': self.restaurants}
 
-    def is_empty(self) -> bool:
+    def is_empty(self, queue=None) -> bool:
         """
         Assert is queue is empty
         @return: bool
         """
+        if queue == "clients":
+            return len(self.clients) == 0
+
+        elif queue == "restaurants":
+            return len(self.restaurants) == 0
+
         return len(self.clients) == 0 and len(self.restaurants) == 0
 
     def _pull_priority(self):
@@ -32,7 +38,7 @@ class Queue:
         """
         if not queue:
             raise ValueError("Queue must be specified when using Separate Pools mode")
-        client = self.queue_map['queue'].pop(0)  # Pull from specified queue
+        client = self.queue_map[queue].pop(0)  # Pull from specified queue
         return client
 
     def _pull_queue(self):
