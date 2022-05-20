@@ -114,21 +114,6 @@ class Probabilities:
                 sector = "High-Tech"
         return n_employees, sector
 
-    def contact_probabilities(self, client):
-        """
-        If we decided that the client will contact the call center, decide how
-        Tuple represents probabilities
-        @param client:
-        @return:
-        """
-        # parameters on contact channel are sectors and age - weather decided if the call center will be contacted at all
-        # Given we have a rainy day -> more calls for orders -> more where is my food (otherwise people just walk)
-        # Given a sector and age -> reset my password/login issues
-        sectors = {'blue-collar': (0.75, 0.25),
-                   'high-tech': ()}
-
-        if client.sector == '':
-            pass
 
     @staticmethod
     def contact_rate(curr_hour: datetime.datetime, rest_queue_len: int, n_high_tech:int, n_industry:int, weather=None):
