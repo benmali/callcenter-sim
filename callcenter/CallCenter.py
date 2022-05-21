@@ -62,6 +62,7 @@ class CallCenter:
         Probabilities.client_patience_ex = float(self.user_parameters.get("Client Patience ~ E(X)"))
         Probabilities.client_patience_var = float(self.user_parameters.get("Client Patience ~ V(X)"))
         Probabilities.rain_factor = float(self.user_parameters.get("Rain Factor"))
+        Probabilities.holiday = self.user_parameters.get("Holiday")
         if self.mode == 'SeparatePool':
             percentage_of_rest_agents = 0.2  # 20% of the agents will answer calls from restaurants
             self.n_rest_agents = math.ceil(

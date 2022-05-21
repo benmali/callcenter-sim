@@ -39,7 +39,7 @@ class Metrics:
             self.call_client_abandoned += 1
             # add other stuff here
         else:
-            self.chat_client_abandoned +=1
+            self.chat_client_abandoned += 1
 
     def get_contact_reason_breakdown(self, contact_method):
         """

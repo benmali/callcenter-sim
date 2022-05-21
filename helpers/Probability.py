@@ -5,8 +5,6 @@
 # CustomerAgent break hours
 # Distribution of call time - if client is over 50 or blue collar assume call takes longer
 
-# What is the company signing rate (how often we have a signing?- distribution?)
-# We assume a company signing is unrelated to other companies signing
 import datetime
 import numpy as np
 import randomname
@@ -19,6 +17,9 @@ class Probabilities:
     client_patience_ex = None
     client_patience_var = None
     rain_factor = 1.3
+    proportion_of_calls_high_tech = 0.02
+    proportion_of_calls_industry = 0.05
+    holiday = None
 
     def __init__(self, time_of_day, date: datetime.datetime):
         self.time_of_day = time_of_day
@@ -127,19 +128,24 @@ class Probabilities:
         @return: return time between arrivals (hours)
         """
 
+        holiday_factor = 1.1
         if weather == 'rainy':
             weather_factor = Probabilities.rain_factor
         else:
             weather_factor = 1
 
-        # (n_ht * 0.02 + n_w*0.05) * hour_factor = base_rate
-        # n_high_tech = 60_000
-        # n_industry = 40_000
-        hightech_prop = 0.02
-        industry_prop = 0.05
+        if Probabilities.holiday == 'Yes':
+            # we set the factor as the max between holiday or rain
+            if weather == 'rainy':
+                weather_factor = max(holiday_factor, weather_factor)
+            else:
+                weather_factor = holiday_factor
+
+        high_tech_prop = Probabilities.proportion_of_calls_high_tech
+        industry_prop = Probabilities.proportion_of_calls_industry
         hour_factors = [320, 42.6, 18.28, 14.5, 12.3, 9.19, 8.64, 16, 24.61, 35.5, 45.71, 53.3, 71.1, 91.42, 160, 250]
         h_factor_map = {hour: hour_factors[i] for i, hour in enumerate(range(8, 24))}
-        base_rate = (n_high_tech * hightech_prop + n_industry * industry_prop) / h_factor_map[curr_hour.hour]
+        base_rate = (n_high_tech * high_tech_prop + n_industry * industry_prop) / h_factor_map[curr_hour.hour]
         return np.random.exponential(1 / (base_rate * weather_factor * 1.02 ** rest_queue_len))
 
     @staticmethod
@@ -196,9 +202,3 @@ class Probabilities:
         probability = np.random.uniform(0, 1)
         return probability < 0.06
 
-if __name__ == "__main__":
-    # my_date = datetime.datetime(2019, 12, 12)
-    # ps = Probabilities("16", my_date)
-    # print(ps.weather_probabilities())
-    print(1 / np.random.exponential(1 / 2000))  # bigger gap
-    print(1 / np.random.exponential(1 / 50))  # smaller gap
