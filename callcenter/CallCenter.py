@@ -30,11 +30,6 @@ logger = logging.getLogger('CallCenter')
 # Hofit said 60% is chat after the corona - so we will set this chance to generate a call or a chat
 # We assume that as long as the restaurant queue isn't empty, the call rate and chat rate raises by 1.1^ len(rest_queue)
 
-# TODO - Add queue metrics (average lengths - histogram)
-# TODO - Add interface to change the distributions
-# TODO - Test different modes
-# TODO - add restaurant calling
-
 
 class CallCenter:
     def __init__(self, mode: str = "PriorityQueue"):
