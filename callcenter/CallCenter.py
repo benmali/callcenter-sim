@@ -30,11 +30,6 @@ logger = logging.getLogger('CallCenter')
 # Hofit said 60% is chat after the corona - so we will set this chance to generate a call or a chat
 # We assume that as long as the restaurant queue isn't empty, the call rate and chat rate raises by 1.1^ len(rest_queue)
 
-# TODO - Add queue metrics (average lengths - histogram)
-# TODO - Add interface to change the distributions
-# TODO - Test different modes
-# TODO - add restaurant calling
-
 
 class CallCenter:
     def __init__(self, mode: str = "PriorityQueue"):
@@ -45,12 +40,18 @@ class CallCenter:
         sim_mode = self.user_parameters.get("Simulation Mode")
         sim_map = {'Regular': 'Regular', "Separate Queues": "SeparatePool", "Priority Queue": "PriorityQueue"}
         self.mode = sim_map[sim_mode]  # PriorityQueue, SeparatePool, Regular
+        self.n_high_tech_employees = int(self.user_parameters.get("High-Tech Employees"))
+        self.n_industry_employees = int(self.user_parameters.get("Industry Employees"))
         self.curr_time = TimeHelper.string__to_full_time('01-01-2021 08:00:00')
         self.opening_hour = TimeHelper.string_to_hour('08:00:00')
         self.closing_hour = TimeHelper.string_to_hour('23:00:00')
         self.n_restaurants = 1_000
-        self.call_queue = CallQueue(self.mode)
-        self.chat_queue = ChatQueue(self.mode)
+        if self.mode == "SeparatePool":
+            self.call_queue = CallQueue("PriorityQueue")
+            self.chat_queue = ChatQueue("PriorityQueue")
+        else:
+            self.call_queue = CallQueue(self.mode)
+            self.chat_queue = ChatQueue(self.mode)
         self.n_rest_in_queue = 0
         self.rest_call_proportion = 0.03  # 3% of all calls belong to restaurants
         self.weather = self.user_parameters.get("Weather").lower()
@@ -61,17 +62,17 @@ class CallCenter:
         Probabilities.client_patience_ex = float(self.user_parameters.get("Client Patience ~ E(X)"))
         Probabilities.client_patience_var = float(self.user_parameters.get("Client Patience ~ V(X)"))
         Probabilities.rain_factor = float(self.user_parameters.get("Rain Factor"))
+        Probabilities.holiday = self.user_parameters.get("Holiday")
         if self.mode == 'SeparatePool':
-            percentage_of_rest_agents = 0.2  # 20% of the agents will answer calls from restaurants
-            self.n_rest_agents = math.ceil(
-                self.starting_number_of_agents * percentage_of_rest_agents)  # At least 1 agent
-            self.n_end_client_agents = self.starting_number_of_agents - self.n_rest_agents  # Other agents serve clients
-            # i % 2 condition splits half the agents for chat duty other half for calls
-            self.end_service_agents = [
-                CustomerServiceAgent(i, self.call_queue if i % 2 == 0 else self.chat_queue, self.curr_time) for i in
-                range(self.n_end_client_agents)]
-            self.rest_service_agents = [CustomerServiceAgent(i, self.call_queue, self.curr_time) for i in
-                                        range(self.n_rest_agents)]
+            self.mode = 'PriorityQueue'
+            percentage_of_rest_agents = 0.3  # 10% of the agents will answer calls from restaurants
+            n_call_agents = math.ceil(self.starting_number_of_agents * percentage_of_rest_agents)
+            #     self.starting_number_of_agents * percentage_of_rest_agents)  # At least 1 agent
+
+            self.service_agents = [CustomerServiceAgent(i, self.call_queue, self.curr_time) for i in
+                                   range(n_call_agents)]
+            for i in range(n_call_agents, self.starting_number_of_agents):
+                self.service_agents.append(CustomerServiceAgent(i, self.chat_queue, self.curr_time))
         else:  # Regular and PriorityQueue
             # i % 2 condition splits half the agents for chat duty other half for calls
             self.service_agents = [
@@ -149,6 +150,8 @@ class CallCenter:
         # # Generate new chats and call arrivals
         next_contact_time = self.curr_time + datetime.timedelta(hours=Probabilities.contact_rate(self.curr_time,
                                                                                            self.n_rest_in_queue,
+                                                                                           self.n_high_tech_employees,
+                                                                                           self.n_industry_employees,
                                                                                            self.weather))
 
         if np.random.uniform(0, 1) < self.rest_call_proportion:  # proportion of restaurants call out of all calls
@@ -199,6 +202,7 @@ class CallCenter:
                     client_data = client.get_metrics()
                     logger.info(f"{client} abandoned at {client.abandon_time}")
                     self.day_metrics.add_abandonment(client_data)
+                    self.day_metrics.add_call_or_chat(client_data)
                     continue
                 pulled_valid_client = True
                 logger.debug(f"{agent} {agent.task_assigned} pulled another client {self.curr_time}")
@@ -370,6 +374,7 @@ class CallCenter:
             print(f"Number of calls handled {len(self.day_metrics.calls)}")
             print(f"Call reason breakdown: {self.day_metrics.get_contact_reason_breakdown('call')}")
             print(f"Chat reason breakdown: {self.day_metrics.get_contact_reason_breakdown('chat')}")
+            Graphs.plot_call_abandon_times(self.day_metrics.get_call_abandonments())
             Graphs.plot_arrival_histogram(self.day_metrics.arrival_histogram)
             Graphs.plot_rest_wait_histogram(self.day_metrics.get_rest_wait_histogram())
             Graphs.plot_system_hist_chats(*self.day_metrics.system_state_hist_chats())

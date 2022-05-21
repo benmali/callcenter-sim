@@ -5,8 +5,6 @@
 # CustomerAgent break hours
 # Distribution of call time - if client is over 50 or blue collar assume call takes longer
 
-# What is the company signing rate (how often we have a signing?- distribution?)
-# We assume a company signing is unrelated to other companies signing
 import datetime
 import numpy as np
 import randomname
@@ -19,6 +17,9 @@ class Probabilities:
     client_patience_ex = None
     client_patience_var = None
     rain_factor = 1.3
+    proportion_of_calls_high_tech = 0.02
+    proportion_of_calls_industry = 0.05
+    holiday = None
 
     def __init__(self, time_of_day, date: datetime.datetime):
         self.time_of_day = time_of_day
@@ -114,38 +115,25 @@ class Probabilities:
                 sector = "High-Tech"
         return n_employees, sector
 
-    def contact_probabilities(self, client):
-        """
-        If we decided that the client will contact the call center, decide how
-        Tuple represents probabilities
-        @param client:
-        @return:
-        """
-        # parameters on contact channel are sectors and age - weather decided if the call center will be contacted at all
-        # Given we have a rainy day -> more calls for orders -> more where is my food (otherwise people just walk)
-        # Given a sector and age -> reset my password/login issues
-        sectors = {'blue-collar': (0.75, 0.25),
-                   'high-tech': ()}
-
-        if client.sector == '':
-            pass
 
     @staticmethod
-    def contact_rate(curr_hour: datetime.datetime, rest_queue_len: int, weather=None):
+    def contact_rate(curr_hour: datetime.datetime, rest_queue_len: int, n_high_tech:int, n_industry:int, weather=None):
         """
         Return the time between calls depending on the hour of the day
         Formula is x ~ Pois(100) (100 clients/ 1 hour) -> x ~ Exp(1 / 100) (time between clients, in hours)
         We assume the more restaurants in the queue, generates 2% per restaurant
         Therefore we multiply the arrival rate by 1.02 * times the restaurants in queue
         @param weather: rainy or sunny
-        @param curr_hour: datetime of cuurent hour
+        @param curr_hour: datetime of current hour
         @return: return time between arrivals (hours)
         """
 
+        holiday_factor = 1.1
         if weather == 'rainy':
             weather_factor = Probabilities.rain_factor
         else:
             weather_factor = 1
+<<<<<<< HEAD
         # TODO - Include in this formula the number of employees
         # ((0.3 * n_bc + 0.12 * n_ht) * hour_factor) => 10
         if curr_hour.hour == 8:
@@ -178,9 +166,22 @@ class Probabilities:
             return np.random.exponential(1 / (35 * weather_factor * 1.02 ** rest_queue_len))
         elif curr_hour.hour == 22:
             return np.random.exponential(1 / (20 * weather_factor * 1.02 ** rest_queue_len))
+=======
 
-        else:
-            return np.random.exponential(1 / 35)
+        if Probabilities.holiday == 'Yes':
+            # we set the factor as the max between holiday or rain
+            if weather == 'rainy':
+                weather_factor = max(holiday_factor, weather_factor)
+            else:
+                weather_factor = holiday_factor
+>>>>>>> 77eb39ff15c97e7e2c4ce040de460c1a6c46311a
+
+        high_tech_prop = Probabilities.proportion_of_calls_high_tech
+        industry_prop = Probabilities.proportion_of_calls_industry
+        hour_factors = [320, 42.6, 18.28, 14.5, 12.3, 9.19, 8.64, 16, 24.61, 35.5, 45.71, 53.3, 71.1, 91.42, 160, 250]
+        h_factor_map = {hour: hour_factors[i] for i, hour in enumerate(range(8, 24))}
+        base_rate = (n_high_tech * high_tech_prop + n_industry * industry_prop) / h_factor_map[curr_hour.hour]
+        return np.random.exponential(1 / (base_rate * weather_factor * 1.02 ** rest_queue_len))
 
     @staticmethod
     def call_duration(client) -> float:
@@ -236,11 +237,3 @@ class Probabilities:
         probability = np.random.uniform(0, 1)
         return probability < 0.06
 
-
-
-if __name__ == "__main__":
-    # my_date = datetime.datetime(2019, 12, 12)
-    # ps = Probabilities("16", my_date)
-    # print(ps.weather_probabilities())
-    print(1 / np.random.exponential(1 / 2000))  # bigger gap
-    print(1 / np.random.exponential(1 / 50))  # smaller gap

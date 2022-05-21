@@ -37,8 +37,8 @@
                 <tr class="spaceUnder">
                     <td>
                         <label style="color: white" for="{{ param }}">{{ param }}:</label>
-                        {%- if ( (param == 'Blue-Collar Employees') or (param == 'High-Tech Employees') ) -%}
-                            <input type="number" id="{{ param }}" name="{{ param }}" class="form-control" pattern="\d+" >
+                        {%- if ( (param == 'Industry Employees') or (param == 'High-Tech Employees') ) -%}
+                            <input type="number" value="50000" id="{{ param }}" name="{{ param }}" class="form-control" pattern="\d+" >
                         {% else %}
                         <select class="custom-select" name="{{ param }}" id="{{ param }}">
                             {% for option in value %}
@@ -49,13 +49,16 @@
                     </td>
                 </tr>
                 {% endfor %}
-                <tr>
+                <tr align="center">
                     <td><input class="btn btn-light" type="submit" value="Submit"></td>
                     <!--<td><input type="submit" value="Submit"></td>-->
-                    <td></td>
+
                 </tr>
             </form>
         </table>
+    <br><br><br><br/>
+
     </div>
+<div><hr></div>
 </body>
 </html>

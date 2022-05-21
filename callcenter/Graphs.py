@@ -1,5 +1,4 @@
 import matplotlib.pyplot as plt
-import seaborn as sns
 import numpy as np
 
 
@@ -68,9 +67,9 @@ class Graphs:
     def plot_system_hist_calls(clients, hours):
         # bins = np.linspace(8,23, 160)
         fig, ax = plt.subplots(figsize=(7, 4))
-        ax.set_title('Hours of the day vs Clients in the system')
+        ax.set_title('Hours of the day vs Calls in the system')
         ax.set_xlabel('Hours of the day')
-        ax.set_ylabel('Number of people in the system')
+        ax.set_ylabel('Number of calls in the system')
         ax.set_yticks(ticks=np.arange(0, 100, 2))
         plt.stairs(clients, hours)
         plt.savefig('../flask/static/images/calls.png')
@@ -86,3 +85,14 @@ class Graphs:
         ax.set_yticks(ticks=np.arange(0, 100, 5))
         plt.stairs(clients, hours)
         plt.show()
+
+    @staticmethod
+    def plot_call_abandon_times(abandon_histogram):
+        fig, ax = plt.subplots(figsize=(7, 4))
+        ax.set_title('Hours of the day vs Calls abandoned')
+        ax.set_xlabel('Hours of the day')
+        ax.set_ylabel('Number of calls abandoned')
+        ax.set_yticks(ticks=np.arange(0, 200, 10))
+        # ax.hist(wait_histogram, bins=10)
+        plt.bar(abandon_histogram.keys(), abandon_histogram.values())
+        plt.savefig('../flask/static/images/call_abandon.png')
