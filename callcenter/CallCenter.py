@@ -45,14 +45,20 @@ class CallCenter:
         sim_mode = self.user_parameters.get("Simulation Mode")
         sim_map = {'Regular': 'Regular', "Separate Queues": "SeparatePool", "Priority Queue": "PriorityQueue"}
         self.mode = sim_map[sim_mode]  # PriorityQueue, SeparatePool, Regular
+        # if self.mode == 'SeparatePool':
+        #     self.mode = 'PriorityQueue'
         self.n_high_tech_employees = int(self.user_parameters.get("High-Tech Employees"))
         self.n_industry_employees = int(self.user_parameters.get("Industry Employees"))
         self.curr_time = TimeHelper.string__to_full_time('01-01-2021 08:00:00')
         self.opening_hour = TimeHelper.string_to_hour('08:00:00')
         self.closing_hour = TimeHelper.string_to_hour('23:00:00')
         self.n_restaurants = 1_000
-        self.call_queue = CallQueue(self.mode)
-        self.chat_queue = ChatQueue(self.mode)
+        if self.mode == "SeparatePool":
+            self.call_queue = CallQueue("PriorityQueue")
+            self.chat_queue = ChatQueue("PriorityQueue")
+        else:
+            self.call_queue = CallQueue(self.mode)
+            self.chat_queue = ChatQueue(self.mode)
         self.n_rest_in_queue = 0
         self.rest_call_proportion = 0.03  # 3% of all calls belong to restaurants
         self.weather = self.user_parameters.get("Weather").lower()
@@ -64,16 +70,26 @@ class CallCenter:
         Probabilities.rain_factor = float(self.user_parameters.get("Rain Factor"))
         Probabilities.holiday = self.user_parameters.get("Holiday")
         if self.mode == 'SeparatePool':
-            percentage_of_rest_agents = 0.2  # 20% of the agents will answer calls from restaurants
-            self.n_rest_agents = math.ceil(
-                self.starting_number_of_agents * percentage_of_rest_agents)  # At least 1 agent
-            self.n_end_client_agents = self.starting_number_of_agents - self.n_rest_agents  # Other agents serve clients
-            # i % 2 condition splits half the agents for chat duty other half for calls
-            self.end_service_agents = [
-                CustomerServiceAgent(i, self.call_queue if i % 2 == 0 else self.chat_queue, self.curr_time) for i in
-                range(self.n_end_client_agents)]
-            self.rest_service_agents = [CustomerServiceAgent(i, self.call_queue, self.curr_time) for i in
-                                        range(self.n_rest_agents)]
+            self.mode = 'PriorityQueue'
+            percentage_of_rest_agents = 0.7  # 10% of the agents will answer calls from restaurants
+            n_call_agents = math.ceil(self.starting_number_of_agents * percentage_of_rest_agents)
+            #     self.starting_number_of_agents * percentage_of_rest_agents)  # At least 1 agent
+
+            self.service_agents = [CustomerServiceAgent(i, self.call_queue, self.curr_time) for i in
+                                   range(n_call_agents)]
+            for i in range(n_call_agents, self.starting_number_of_agents):
+                self.service_agents.append(CustomerServiceAgent(i, self.chat_queue, self.curr_time))
+
+            # percentage_of_rest_agents = 0.2  # 20% of the agents will answer calls from restaurants
+            # self.n_rest_agents = math.ceil(
+            #     self.starting_number_of_agents * percentage_of_rest_agents)  # At least 1 agent
+            # self.n_end_client_agents = self.starting_number_of_agents - self.n_rest_agents  # Other agents serve clients
+            # # i % 2 condition splits half the agents for chat duty other half for calls
+            # self.end_service_agents = [
+            #     CustomerServiceAgent(i, self.call_queue if i % 2 == 0 else self.chat_queue, self.curr_time) for i in
+            #     range(self.n_end_client_agents)]
+            # self.rest_service_agents = [CustomerServiceAgent(i, self.call_queue, self.curr_time) for i in
+            #                             range(self.n_rest_agents)]
         else:  # Regular and PriorityQueue
             # i % 2 condition splits half the agents for chat duty other half for calls
             self.service_agents = [
@@ -150,10 +166,10 @@ class CallCenter:
 
         # # Generate new chats and call arrivals
         next_contact_time = self.curr_time + datetime.timedelta(hours=Probabilities.contact_rate(self.curr_time,
-                                                                                           self.n_rest_in_queue,
-                                                                                           self.n_high_tech_employees,
-                                                                                           self.n_industry_employees,
-                                                                                           self.weather))
+                                                                                                 self.n_rest_in_queue,
+                                                                                                 self.n_high_tech_employees,
+                                                                                                 self.n_industry_employees,
+                                                                                                 self.weather))
 
         if np.random.uniform(0, 1) < 0.03:  # 3% are rests
             hpq.heappush(self.events,
@@ -178,7 +194,7 @@ class CallCenter:
         self.day_metrics.add_call_or_chat(client_data)
         break_time = agent.end_call_or_chat()
         logger.debug(
-            f"{agent} - break? {break_time} at {self.curr_time}. ending {agent.task_assigned} - duration: {client_data.service_time / 60 }")
+            f"{agent} - break? {break_time} at {self.curr_time}. ending {agent.task_assigned} - duration: {client_data.service_time / 60}")
         if break_time:
             logger.debug(f"Agent {agent} is going for a break for {break_time // 60} minutes at {self.curr_time}")
             hpq.heappush(self.events,
@@ -368,7 +384,8 @@ class CallCenter:
             Graphs.plot_rest_wait_histogram(self.day_metrics.get_rest_wait_histogram())
             Graphs.plot_system_hist_chats(*self.day_metrics.system_state_hist_chats())
             Graphs.plot_client_wait_histogram(self.day_metrics.get_client_call_wait_histogram())
-            Graphs.plot_system_hist_calls(*self.day_metrics.system_state_hist_calls())  # must be last to display results correctly
+            Graphs.plot_system_hist_calls(
+                *self.day_metrics.system_state_hist_calls())  # must be last to display results correctly
             # reset day
             self.events = []
             self.curr_time = TimeHelper.set_next_day(self.curr_time)
