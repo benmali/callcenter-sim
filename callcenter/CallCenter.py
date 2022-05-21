@@ -46,8 +46,12 @@ class CallCenter:
         self.opening_hour = TimeHelper.string_to_hour('08:00:00')
         self.closing_hour = TimeHelper.string_to_hour('23:00:00')
         self.n_restaurants = 1_000
-        self.call_queue = CallQueue(self.mode)
-        self.chat_queue = ChatQueue(self.mode)
+        if self.mode == "SeparatePool":
+            self.call_queue = CallQueue("PriorityQueue")
+            self.chat_queue = ChatQueue("PriorityQueue")
+        else:
+            self.call_queue = CallQueue(self.mode)
+            self.chat_queue = ChatQueue(self.mode)
         self.n_rest_in_queue = 0
         self.rest_call_proportion = 0.03  # 3% of all calls belong to restaurants
         self.weather = self.user_parameters.get("Weather").lower()
@@ -59,16 +63,15 @@ class CallCenter:
         Probabilities.rain_factor = float(self.user_parameters.get("Rain Factor"))
         Probabilities.holiday = self.user_parameters.get("Holiday")
         if self.mode == 'SeparatePool':
-            percentage_of_rest_agents = 0.2  # 20% of the agents will answer calls from restaurants
-            self.n_rest_agents = math.ceil(
-                self.starting_number_of_agents * percentage_of_rest_agents)  # At least 1 agent
-            self.n_end_client_agents = self.starting_number_of_agents - self.n_rest_agents  # Other agents serve clients
-            # i % 2 condition splits half the agents for chat duty other half for calls
-            self.end_service_agents = [
-                CustomerServiceAgent(i, self.call_queue if i % 2 == 0 else self.chat_queue, self.curr_time) for i in
-                range(self.n_end_client_agents)]
-            self.rest_service_agents = [CustomerServiceAgent(i, self.call_queue, self.curr_time) for i in
-                                        range(self.n_rest_agents)]
+            self.mode = 'PriorityQueue'
+            percentage_of_rest_agents = 0.3  # 10% of the agents will answer calls from restaurants
+            n_call_agents = math.ceil(self.starting_number_of_agents * percentage_of_rest_agents)
+            #     self.starting_number_of_agents * percentage_of_rest_agents)  # At least 1 agent
+
+            self.service_agents = [CustomerServiceAgent(i, self.call_queue, self.curr_time) for i in
+                                   range(n_call_agents)]
+            for i in range(n_call_agents, self.starting_number_of_agents):
+                self.service_agents.append(CustomerServiceAgent(i, self.chat_queue, self.curr_time))
         else:  # Regular and PriorityQueue
             # i % 2 condition splits half the agents for chat duty other half for calls
             self.service_agents = [
