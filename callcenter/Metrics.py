@@ -1,6 +1,6 @@
 import datetime
 from collections import defaultdict
-
+from helpers import TimeHelper
 import numpy as np
 
 
@@ -27,6 +27,15 @@ class Metrics:
         self.arrival_histogram = defaultdict(int)
     # Number of end employees ratio to agents
     # What is the number of agents needed to provide SLA when a new company of size X signs?
+
+    @staticmethod
+    def _create_hours_strings(time: datetime.datetime):
+        """
+        Create a string of half hours to store data in dictionary by half hours
+        @param time:
+        @return:
+        """
+        return f"{time.hour}.{5 if time.minute // 30 > 0 else 0}"
 
     def add_call_or_chat(self, client_data):
         contact_method = client_data.contact_method
@@ -66,12 +75,11 @@ class Metrics:
             if call.wait_time < 0:
                 continue
             abandon_time = call.arrival_time + datetime.timedelta(minutes=call.wait_time)
-            call_abandon_hist[f"{abandon_time.hour}.{5 if abandon_time.minute // 30 > 0 else 0}"] += 1
+            call_abandon_hist[self._create_hours_strings(abandon_time)] += 1
         return call_abandon_hist
 
     def get_chat_abandonments(self):
         chat_abandon_hist = defaultdict(int)
-
 
     def get_rest_calls(self):
         return [call for call in self.calls if call.client_type == 'Restaurant']
@@ -102,7 +110,6 @@ class Metrics:
                 continue
             calls_hist[round(call.wait_time, 2)] += 1
         return calls_hist
-
 
     def system_state_hist_calls(self):
         system_hist = {}

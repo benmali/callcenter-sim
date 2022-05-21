@@ -9,7 +9,7 @@
     "Chat Variance ~ V(X)": "0.5min",
     "Call Duration ~ E(X)": "3min",
     "Call Variance ~ V(X)": "0.5min",
-    "Number of Call Agents": "6",
+    "Number of Call Agents": "4",
     "Number of Chat Agents": "4",
     "Client Patience ~ E(X)": "10",
     "Client Patience ~ V(X)": "0.5"

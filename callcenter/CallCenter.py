@@ -40,6 +40,8 @@ class CallCenter:
         sim_mode = self.user_parameters.get("Simulation Mode")
         sim_map = {'Regular': 'Regular', "Separate Queues": "SeparatePool", "Priority Queue": "PriorityQueue"}
         self.mode = sim_map[sim_mode]  # PriorityQueue, SeparatePool, Regular
+        # if self.mode == 'SeparatePool':
+        #     self.mode = 'PriorityQueue'
         self.n_high_tech_employees = int(self.user_parameters.get("High-Tech Employees"))
         self.n_industry_employees = int(self.user_parameters.get("Industry Employees"))
         self.curr_time = TimeHelper.string__to_full_time('01-01-2021 08:00:00')
@@ -149,10 +151,10 @@ class CallCenter:
 
         # # Generate new chats and call arrivals
         next_contact_time = self.curr_time + datetime.timedelta(hours=Probabilities.contact_rate(self.curr_time,
-                                                                                           self.n_rest_in_queue,
-                                                                                           self.n_high_tech_employees,
-                                                                                           self.n_industry_employees,
-                                                                                           self.weather))
+                                                                                                 self.n_rest_in_queue,
+                                                                                                 self.n_high_tech_employees,
+                                                                                                 self.n_industry_employees,
+                                                                                                 self.weather))
 
         if np.random.uniform(0, 1) < self.rest_call_proportion:  # proportion of restaurants call out of all calls
             hpq.heappush(self.events,
@@ -177,7 +179,7 @@ class CallCenter:
         self.day_metrics.add_call_or_chat(client_data)
         break_time = agent.end_call_or_chat()
         logger.debug(
-            f"{agent} - break? {break_time} at {self.curr_time}. ending {agent.task_assigned} - duration: {client_data.service_time / 60 }")
+            f"{agent} - break? {break_time} at {self.curr_time}. ending {agent.task_assigned} - duration: {client_data.service_time / 60}")
         if break_time:
             logger.debug(f"Agent {agent} is going for a break for {break_time // 60} minutes at {self.curr_time}")
             hpq.heappush(self.events,
@@ -379,7 +381,8 @@ class CallCenter:
             Graphs.plot_rest_wait_histogram(self.day_metrics.get_rest_wait_histogram())
             Graphs.plot_system_hist_chats(*self.day_metrics.system_state_hist_chats())
             Graphs.plot_client_wait_histogram(self.day_metrics.get_client_call_wait_histogram())
-            Graphs.plot_system_hist_calls(*self.day_metrics.system_state_hist_calls())  # must be last to display results correctly
+            Graphs.plot_system_hist_calls(
+                *self.day_metrics.system_state_hist_calls())  # must be last to display results correctly
             # reset day
             self.events = []
             self.curr_time = TimeHelper.set_next_day(self.curr_time)
