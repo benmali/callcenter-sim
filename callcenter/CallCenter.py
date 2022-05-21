@@ -363,6 +363,7 @@ class CallCenter:
             print(f"Number of calls handled {len(self.day_metrics.calls)}")
             print(f"Call reason breakdown: {self.day_metrics.get_contact_reason_breakdown('call')}")
             print(f"Chat reason breakdown: {self.day_metrics.get_contact_reason_breakdown('chat')}")
+            Graphs.plot_call_abandon_times(self.day_metrics.get_call_abandonments())
             Graphs.plot_arrival_histogram(self.day_metrics.arrival_histogram)
             Graphs.plot_rest_wait_histogram(self.day_metrics.get_rest_wait_histogram())
             Graphs.plot_system_hist_chats(*self.day_metrics.system_state_hist_chats())

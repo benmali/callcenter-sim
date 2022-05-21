@@ -85,3 +85,14 @@ class Graphs:
         ax.set_yticks(ticks=np.arange(0, 30, 5))
         plt.stairs(clients, hours)
         plt.show()
+
+    @staticmethod
+    def plot_call_abandon_times(abandon_histogram):
+        fig, ax = plt.subplots(figsize=(12, 8))
+        ax.set_title('Hours of the day vs Calls abandoned')
+        ax.set_xlabel('Hours of the day')
+        ax.set_ylabel('Number of calls abandoned')
+        ax.set_yticks(ticks=np.arange(0, 200, 10))
+        # ax.hist(wait_histogram, bins=10)
+        plt.bar(abandon_histogram.keys(), abandon_histogram.values())
+        plt.savefig('../flask/static/images/call_abandon.png')

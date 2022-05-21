@@ -3,6 +3,7 @@ from collections import defaultdict
 
 import numpy as np
 
+
 class Metrics:
     def __init__(self, metric_date: datetime.datetime):
         self.metric_date = metric_date
@@ -21,6 +22,8 @@ class Metrics:
         self.queue_lengths = {}  # Time: (len(call_queue), len(chat_queue)
         self.chat_client_abandoned = 0
         self.call_client_abandoned = 0
+        self.call_abandonments = []
+        self.chat_abandonments = []
         self.arrival_histogram = defaultdict(int)
     # Number of end employees ratio to agents
     # What is the number of agents needed to provide SLA when a new company of size X signs?
@@ -37,9 +40,11 @@ class Metrics:
         contact_method = client_data.contact_method
         if contact_method == "call":
             self.call_client_abandoned += 1
+            self.call_abandonments.append(client_data)
             # add other stuff here
         else:
             self.chat_client_abandoned += 1
+            self.chat_abandonments.append(client_data)
 
     def get_contact_reason_breakdown(self, contact_method):
         """
@@ -55,6 +60,19 @@ class Metrics:
             contact_reason[contact.contact_reason] += 1
         return dict(contact_reason)
 
+    def get_call_abandonments(self):
+        call_abandon_hist = defaultdict(int)
+        for call in self.call_abandonments:
+            if call.wait_time < 0:
+                continue
+            abandon_time = call.arrival_time + datetime.timedelta(minutes=call.wait_time)
+            call_abandon_hist[f"{abandon_time.hour}.{5 if abandon_time.minute // 30 > 0 else 0}"] += 1
+        return call_abandon_hist
+
+    def get_chat_abandonments(self):
+        chat_abandon_hist = defaultdict(int)
+
+
     def get_rest_calls(self):
         return [call for call in self.calls if call.client_type == 'Restaurant']
 
@@ -65,7 +83,8 @@ class Metrics:
         """
         rest_calls_hist = defaultdict(int)
         for call in self.get_rest_calls():
-
+            if call.wait_time < 0:
+                continue
             rest_calls_hist[round(call.wait_time, 2)] += 1
         return rest_calls_hist
 
@@ -79,6 +98,8 @@ class Metrics:
         """
         calls_hist = defaultdict(int)
         for call in self.get_client_calls():
+            if call.wait_time < 0:
+                continue
             calls_hist[round(call.wait_time, 2)] += 1
         return calls_hist
 
