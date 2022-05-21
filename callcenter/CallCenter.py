@@ -197,6 +197,7 @@ class CallCenter:
                     client_data = client.get_metrics()
                     logger.info(f"{client} abandoned at {client.abandon_time}")
                     self.day_metrics.add_abandonment(client_data)
+                    self.day_metrics.add_call_or_chat(client_data)
                     continue
                 pulled_valid_client = True
                 logger.debug(f"{agent} {agent.task_assigned} pulled another client {self.curr_time}")
