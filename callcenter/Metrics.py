@@ -123,7 +123,13 @@ class Metrics:
                 hours.append(system_event[0])
                 people_in_system.append(1)
             else:
-                people_in_system.append(people_in_system[i-1] + 1 if system_event[1] == 1 else people_in_system[i-1] - 1)
+                if system_event[1] == 1:
+                    people_in_system.append(people_in_system[i - 1] + 1)
+                else:
+                    if people_in_system[i-1] - 1 < 0:
+                        people_in_system.append(0)
+                    else:
+                        people_in_system.append(people_in_system[i-1] - 1)
                 hours.append(system_event[0])
         hours.append(hours[-1] + datetime.timedelta(seconds=1))
         return people_in_system, hours
