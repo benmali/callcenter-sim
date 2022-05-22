@@ -87,6 +87,30 @@ class Graphs:
         plt.savefig('../flask/static/images/chats.png')
         plt.show()
 
+
+    @staticmethod
+    def plot_queue_chats(clients, hours):
+        fig, ax = plt.subplots(figsize=(7, 4))
+        ax.set_title('Hours of the day vs Chats in queue')
+        ax.set_xlabel('Hours of the day')
+        ax.set_ylabel('Number of Chats in the queue')
+        ax.set_yticks(ticks=np.arange(0, 100, 5))
+        plt.stairs(clients, hours)
+        plt.savefig('../flask/static/images/chats_queue.png')
+        plt.show()
+
+    @staticmethod
+    def plot_queue_calls(clients, hours):
+        fig, ax = plt.subplots(figsize=(7, 4))
+        ax.set_title('Hours of the day vs Calls in queue')
+        ax.set_xlabel('Hours of the day')
+        ax.set_ylabel('Number of Calls in the queue')
+        ax.set_yticks(ticks=np.arange(0, 100, 5))
+        plt.stairs(clients, hours)
+        plt.savefig('../flask/static/images/calls_queue.png')
+        plt.show()
+
+
     @staticmethod
     def plot_call_abandon_times(abandon_histogram):
         fig, ax = plt.subplots(figsize=(7, 4))
@@ -97,3 +121,14 @@ class Graphs:
         # ax.hist(wait_histogram, bins=10)
         plt.bar(abandon_histogram.keys(), abandon_histogram.values())
         plt.savefig('../flask/static/images/call_abandon.png')
+
+    @staticmethod
+    def plot_chat_abandon_times(abandon_histogram):
+        fig, ax = plt.subplots(figsize=(7, 4))
+        ax.set_title('Hours of the day vs Chats abandoned')
+        ax.set_xlabel('Hours of the day')
+        ax.set_ylabel('Number of chats abandoned')
+        ax.set_yticks(ticks=np.arange(0, 200, 10))
+        # ax.hist(wait_histogram, bins=10)
+        plt.bar(abandon_histogram.keys(), abandon_histogram.values())
+        plt.savefig('../flask/static/images/chat_abandon.png')

@@ -106,6 +106,7 @@ class CallCenter:
         if client.client_type == 'Restaurant':
             self.n_rest_in_queue += 1
         client.arrival_time = self.curr_time
+        self.day_metrics.mark_call_or_chat_events(client.contact_method, self.curr_time, 1)
         self.day_metrics.arrival_histogram[self.curr_time.hour] += 1  # arrival histogram is default dict
         logger.info(f"Incoming {event.client.contact_method} from {client}")
         if event.client.contact_method == 'call':
@@ -173,6 +174,7 @@ class CallCenter:
         """
         agent = event.agent
         client = event.client
+        self.day_metrics.mark_call_or_chat_events(client.contact_method, self.curr_time , 0)
         client_data = client.get_metrics()
         if client.client_type == 'Restaurant':
             self.n_rest_in_queue -= 1
@@ -201,6 +203,8 @@ class CallCenter:
                 client = self.queue_map[queue].dequeue(sub_queue)
                 if self.curr_time - client.arrival_time > client.max_wait_time:
                     client.abandon_queue()
+                    self.day_metrics.mark_call_or_chat_events(client.contact_method,
+                                                              client.arrival_time + client.wait_time, 0)
                     client_data = client.get_metrics()
                     logger.info(f"{client} abandoned at {client.abandon_time}")
                     self.day_metrics.add_abandonment(client_data)
@@ -377,9 +381,12 @@ class CallCenter:
             print(f"Call reason breakdown: {self.day_metrics.get_contact_reason_breakdown('call')}")
             print(f"Chat reason breakdown: {self.day_metrics.get_contact_reason_breakdown('chat')}")
             Graphs.plot_call_abandon_times(self.day_metrics.get_call_abandonments())
+            Graphs.plot_chat_abandon_times(self.day_metrics.get_chat_abandonments())
             Graphs.plot_arrival_histogram(self.day_metrics.arrival_histogram)
             Graphs.plot_rest_wait_histogram(self.day_metrics.get_rest_wait_histogram())
             Graphs.plot_client_wait_histogram(self.day_metrics.get_client_call_wait_histogram())
+            Graphs.plot_queue_calls(*self.day_metrics.n_calls_in_queue())
+            Graphs.plot_queue_chats(*self.day_metrics.n_chats_in_queue())
             Graphs.plot_system_hist_chats(*self.day_metrics.system_state_hist_chats())
             Graphs.plot_system_hist_calls(
                 *self.day_metrics.system_state_hist_calls())  # must be last to display results correctly
