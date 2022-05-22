@@ -160,7 +160,7 @@ class Metrics:
             if len(people_in_system[index_counter: index_counter + group_len]) == 0:
                 hour_avgs.append(0)
             else:
-                hour_avgs.append(math.ceil(sum(people_in_system[index_counter: index_counter + group_len]) / len(
+                hour_avgs.append(math.floor(sum(people_in_system[index_counter: index_counter + group_len]) / len(
                     people_in_system[index_counter: index_counter + group_len])))
             index_counter += group_len
         hour_names = [i for i in range(8, 9 + len(hour_avgs))]
@@ -191,7 +191,7 @@ class Metrics:
             if len(people_in_system[index_counter: index_counter + group_len]) == 0:
                 hour_avgs.append(0)
             else:
-                hour_avgs.append(math.ceil(sum(people_in_system[index_counter: index_counter + group_len]) / len(
+                hour_avgs.append(math.floor(sum(people_in_system[index_counter: index_counter + group_len]) / len(
                     people_in_system[index_counter: index_counter + group_len])))
             index_counter += group_len
         hour_names = [i for i in range(8, 9 + len(hour_avgs))]
@@ -218,7 +218,7 @@ class Metrics:
             if len(people_in_system[index_counter: index_counter + group_len]) == 0:
                 hour_avgs.append(0)
             else:
-                hour_avgs.append(math.ceil(sum(people_in_system[index_counter: index_counter + group_len]) / len(
+                hour_avgs.append(math.floor(sum(people_in_system[index_counter: index_counter + group_len]) / len(
                     people_in_system[index_counter: index_counter + group_len])))
             index_counter += group_len
         hour_names = [i for i in range(8, 9 + len(hour_avgs))]
@@ -246,7 +246,7 @@ class Metrics:
             if len(people_in_system[index_counter: index_counter + group_len]) == 0:
                 hour_avgs.append(0)
             else:
-                hour_avgs.append(math.ceil(sum(people_in_system[index_counter: index_counter + group_len]) / len(
+                hour_avgs.append(math.floor(sum(people_in_system[index_counter: index_counter + group_len]) / len(
                     people_in_system[index_counter: index_counter + group_len])))
             index_counter += group_len
         hour_names = [i for i in range(8, 9 + len(hour_avgs))]

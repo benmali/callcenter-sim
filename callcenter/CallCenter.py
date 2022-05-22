@@ -208,7 +208,7 @@ class CallCenter:
                     client_data = client.get_metrics()
                     logger.info(f"{client} abandoned at {client.abandon_time}")
                     self.day_metrics.add_abandonment(client_data)
-                    self.day_metrics.add_call_or_chat(client_data)
+                    #self.day_metrics.add_call_or_chat(client_data)
                     continue
                 pulled_valid_client = True
                 logger.debug(f"{agent} {agent.task_assigned} pulled another client {self.curr_time}")
@@ -240,8 +240,17 @@ class CallCenter:
                 sub_queue = 'clients'
             else:
                 sub_queue = 'restaurants'
-        if not self.queue_map[queue].is_empty(sub_queue):  # Pull another client if queue isn't empty
+        while not self.queue_map[queue].is_empty(sub_queue):  # Pull another client if queue isn't empty
             client = self.queue_map[queue].dequeue(sub_queue)
+            if self.curr_time - client.arrival_time > client.max_wait_time:
+                client.abandon_queue()
+                self.day_metrics.mark_call_or_chat_events(client.contact_method,
+                                                          client.arrival_time + client.wait_time, 0)
+                client_data = client.get_metrics()
+                logger.info(f"{client} abandoned at {client.abandon_time}")
+                self.day_metrics.add_abandonment(client_data)
+                #self.day_metrics.add_call_or_chat(client_data)
+                continue
             contact_duration = agent.handle_client(client)
             logger.info(f"{agent} answering {client.contact_method} at {self.curr_time}")
             client.update_metrics(self.curr_time, contact_duration)
@@ -249,6 +258,7 @@ class CallCenter:
                          callcenter.Event(self.curr_time + datetime.timedelta(seconds=contact_duration),
                                           'end_call_or_chat',
                                           client, agent))  # Push new arrival
+            break
         else:
             logger.debug(f"{agent} returned from a break and queue is empty")
 
@@ -392,6 +402,7 @@ class CallCenter:
                 *self.day_metrics.system_state_hist_calls())  # must be last to display results correctly
             # reset day
             self.events = []
+
             self.curr_time = TimeHelper.set_next_day(self.curr_time)
 
 
