@@ -1,8 +1,7 @@
 import datetime
 from collections import defaultdict
-from helpers import TimeHelper
-import numpy as np
-
+from itertools import groupby
+import math
 
 class Metrics:
     def __init__(self, metric_date: datetime.datetime):
@@ -132,7 +131,19 @@ class Metrics:
                         people_in_system.append(people_in_system[i-1] - 1)
                 hours.append(system_event[0])
         hours.append(hours[-1] + datetime.timedelta(seconds=1))
-        return people_in_system, hours
+        hour_groups = [list(v) for i, v in groupby(hours, lambda x: x.hour)]  # GroupBy first element.
+        index_counter = 0
+        hour_avgs = []
+        for hour_group in hour_groups:
+            group_len = len(hour_group)
+            if len(people_in_system[index_counter: index_counter + group_len]) == 0 :
+                hour_avgs.append(0)
+            else:
+                hour_avgs.append(math.ceil(sum(people_in_system[index_counter: index_counter + group_len]) / len(people_in_system[index_counter: index_counter + group_len])))
+            index_counter += group_len
+        hour_names = [i for i in range(8, 9 + len(hour_avgs))]
+        return hour_avgs, hour_names
+        #return people_in_system, hours
 
     def system_state_hist_chats(self):
         system_hist = {}
@@ -147,6 +158,42 @@ class Metrics:
                 people_in_system.append(1)
             else:
                 people_in_system.append(people_in_system[i-1] + 1 if system_event[1] == 1 else people_in_system[i-1] - 1)
+                hours.append(system_event[0])
+        hours.append(hours[-1] + datetime.timedelta(seconds=1))
+        hour_groups = [list(v) for i, v in groupby(hours, lambda x: x.hour)]  # GroupBy first element.
+        index_counter = 0
+        hour_avgs = []
+        for hour_group in hour_groups:
+            group_len = len(hour_group)
+            if len(people_in_system[index_counter: index_counter + group_len]) == 0 :
+                hour_avgs.append(0)
+            else:
+                hour_avgs.append(math.ceil(sum(people_in_system[index_counter: index_counter + group_len]) / len(people_in_system[index_counter: index_counter + group_len])))
+            index_counter += group_len
+        hour_names = [i for i in range(8, 9 + len(hour_avgs))]
+        #return people_in_system, hours
+        return hour_avgs, hour_names
+
+
+    def new_system_state_hist_calls(self):
+        system_hist = {}
+        hours = []
+        people_in_system = []
+        for call in self.calls:
+            system_hist[call.arrival_time] = 1  # Mark arrival
+            system_hist[call.arrival_time + datetime.timedelta(seconds=call.service_time + call.wait_time)] = 0  # Mark leave
+        for i, system_event in enumerate(sorted(system_hist.items(), key=lambda x: x[0])):
+            if i == 0:
+                hours.append(system_event[0])
+                people_in_system.append(1)
+            else:
+                if system_event[1] == 1:
+                    people_in_system.append(people_in_system[i - 1] + 1)
+                else:
+                    if people_in_system[i-1] - 1 < 0:
+                        people_in_system.append(0)
+                    else:
+                        people_in_system.append(people_in_system[i-1] - 1)
                 hours.append(system_event[0])
         hours.append(hours[-1] + datetime.timedelta(seconds=1))
         return people_in_system, hours
