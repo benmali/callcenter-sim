@@ -42,9 +42,9 @@ class Graphs:
     @staticmethod
     def plot_rest_wait_histogram(wait_histogram):
         fig, ax = plt.subplots(figsize=(7, 4))
-        ax.set_title('Number of rest vs Wait time (minutes)')
+        ax.set_title('Wait time (minutes) vs Number of Restaurants')
         ax.set_xlabel('Wait time [Minutes]')
-        ax.set_ylabel('Number of rests')
+        ax.set_ylabel('Number of Restaurants')
         ax.set_yticks(ticks=np.arange(0, 50, 5))
         ax.hist(wait_histogram, bins=10)
         plt.bar(wait_histogram.keys(), wait_histogram.values(),  width=0.1)

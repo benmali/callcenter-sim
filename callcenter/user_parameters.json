@@ -1,9 +1,9 @@
 {
     "Simulation Mode": "Regular",
-    "Holiday": "No",
+    "Holiday": "Yes",
     "Industry Employees": "50000",
     "High-Tech Employees": "50000",
-    "Weather": "Rainy",
+    "Weather": "Sunny",
     "Rain Factor": "1.1",
     "Chat Duration ~ E(X)": "5min",
     "Chat Variance ~ V(X)": "0.5min",
