@@ -1,6 +1,6 @@
 {
     "Simulation Mode": "Regular",
-    "Holiday": "No",
+    "Holiday": "Yes",
     "Industry Employees": "50000",
     "High-Tech Employees": "50000",
     "Weather": "Sunny",
@@ -11,6 +11,6 @@
     "Call Variance ~ V(X)": "0.5min",
     "Number of Call Agents": "4",
     "Number of Chat Agents": "4",
-    "Client Patience ~ E(X)": "10",
+    "Client Patience ~ E(X)": "1",
     "Client Patience ~ V(X)": "0.5"
 }

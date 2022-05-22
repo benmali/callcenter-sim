@@ -133,40 +133,6 @@ class Probabilities:
             weather_factor = Probabilities.rain_factor
         else:
             weather_factor = 1
-<<<<<<< HEAD
-        # TODO - Include in this formula the number of employees
-        # ((0.3 * n_bc + 0.12 * n_ht) * hour_factor) => 10
-        if curr_hour.hour == 8:
-            return np.random.exponential(1 / (10 * weather_factor * 1.02 ** rest_queue_len))
-        elif curr_hour.hour == 9:
-            return np.random.exponential(1 / (75 * weather_factor * 1.02 ** rest_queue_len))
-        elif curr_hour.hour == 10:
-            return np.random.exponential(1 / (175 * weather_factor * 1.02 ** rest_queue_len))
-        elif curr_hour.hour == 11:
-            return np.random.exponential(1 / (220 * weather_factor * 1.02 ** rest_queue_len))
-        elif curr_hour.hour == 12:
-            return np.random.exponential(1 / (260 * weather_factor * 1.02 ** rest_queue_len))
-        elif curr_hour.hour == 13:
-            return np.random.exponential(1 / (348 * weather_factor * 1.02 ** rest_queue_len))
-        elif curr_hour.hour == 14:
-            return np.random.exponential(1 / (370 * weather_factor * 1.02 ** rest_queue_len))
-        elif curr_hour.hour == 15:
-            return np.random.exponential(1 / (200 * weather_factor * 1.02 ** rest_queue_len))
-        elif curr_hour.hour == 16:
-            return np.random.exponential(1 / (130 * weather_factor * 1.02 ** rest_queue_len))
-        elif curr_hour.hour == 17:
-            return np.random.exponential(1 / (90 * weather_factor * 1.02 ** rest_queue_len))
-        elif curr_hour.hour == 18:
-            return np.random.exponential(1 / (70 * weather_factor * 1.02 ** rest_queue_len))
-        elif curr_hour.hour == 19:
-            return np.random.exponential(1 / (60 * weather_factor * 1.02 ** rest_queue_len))
-        elif curr_hour.hour == 20:
-            return np.random.exponential(1 / (45 * weather_factor * 1.02 ** rest_queue_len))
-        elif curr_hour.hour == 21:
-            return np.random.exponential(1 / (35 * weather_factor * 1.02 ** rest_queue_len))
-        elif curr_hour.hour == 22:
-            return np.random.exponential(1 / (20 * weather_factor * 1.02 ** rest_queue_len))
-=======
 
         if Probabilities.holiday == 'Yes':
             # we set the factor as the max between holiday or rain
@@ -174,7 +140,6 @@ class Probabilities:
                 weather_factor = max(holiday_factor, weather_factor)
             else:
                 weather_factor = holiday_factor
->>>>>>> 77eb39ff15c97e7e2c4ce040de460c1a6c46311a
 
         high_tech_prop = Probabilities.proportion_of_calls_high_tech
         industry_prop = Probabilities.proportion_of_calls_industry
