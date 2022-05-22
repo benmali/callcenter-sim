@@ -67,9 +67,9 @@ class Graphs:
     def plot_system_hist_calls(clients, hours):
         # bins = np.linspace(8,23, 160)
         fig, ax = plt.subplots(figsize=(7, 4))
-        ax.set_title('Hours of the day vs Calls in the system')
+        ax.set_title('Hours of the day vs Calls in service')
         ax.set_xlabel('Hours of the day')
-        ax.set_ylabel('Number of calls in the system')
+        ax.set_ylabel('Number of calls in service')
         ax.set_yticks(ticks=np.arange(0, 100, 2))
         plt.stairs(clients, hours)
         plt.savefig('../flask/static/images/calls.png')
@@ -79,9 +79,9 @@ class Graphs:
     @staticmethod
     def plot_system_hist_chats(clients, hours):
         fig, ax = plt.subplots(figsize=(7, 4))
-        ax.set_title('Hours of the day vs Chats in the system')
+        ax.set_title('Hours of the day vs Chats in service')
         ax.set_xlabel('Hours of the day')
-        ax.set_ylabel('Number of chats in the system')
+        ax.set_ylabel('Number of chats in service')
         ax.set_yticks(ticks=np.arange(0, 100, 5))
         plt.stairs(clients, hours)
         plt.savefig('../flask/static/images/chats.png')

@@ -57,7 +57,7 @@ class CallCenter:
         self.n_rest_in_queue = 0
         self.rest_call_proportion = 0.03  # 3% of all calls belong to restaurants
         self.weather = self.user_parameters.get("Weather").lower()
-
+        self.service_agents = []
         self.n_chat_agents = int(self.user_parameters.get("Number of Chat Agents"))
         self.n_call_agents = int(self.user_parameters.get("Number of Call Agents"))
         self.starting_number_of_agents = self.n_chat_agents + self.n_call_agents
@@ -77,9 +77,10 @@ class CallCenter:
                 self.service_agents.append(CustomerServiceAgent(i, self.chat_queue, self.curr_time))
         else:  # Regular and PriorityQueue
             # i % 2 condition splits half the agents for chat duty other half for calls
-            self.service_agents = [
-                CustomerServiceAgent(i, self.call_queue if i % 2 == 0 else self.chat_queue, self.curr_time) for i in
-                range(self.starting_number_of_agents)]
+            for i in range(self.n_call_agents):
+                self.service_agents.append(CustomerServiceAgent(i, self.call_queue, self.curr_time))
+            for i in range(self.n_call_agents, self.n_call_agents + self.n_chat_agents):
+                self.service_agents.append(CustomerServiceAgent(i, self.chat_queue, self.curr_time))
 
         self.n_end_clients = 100_0000
         self.n_employees_by_sector = {"High-Tech": 800_000,
