@@ -84,6 +84,7 @@ class Graphs:
         ax.set_ylabel('Number of chats in the system')
         ax.set_yticks(ticks=np.arange(0, 100, 5))
         plt.stairs(clients, hours)
+        plt.savefig('../flask/static/images/chats.png')
         plt.show()
 
     @staticmethod
