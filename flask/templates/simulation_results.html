@@ -79,13 +79,13 @@ function httpGet(theUrl)
 
 function removePlots() {
     var result = checkFileExist("/static/images/calls.png");
-        if (result == true && count == 3){
+        if (result == true && count == 2){
             clearInterval(TheAce2)
             httpGet("/remove_plots");
         }
     count +=1;
 }
-TheAce2 = window.setInterval(removePlots,3500);
+TheAce2 = window.setInterval(removePlots,5000);
 
 </script>
 
