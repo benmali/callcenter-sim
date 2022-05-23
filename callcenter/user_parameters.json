@@ -1,6 +1,6 @@
 {
-    "Simulation Mode": "Separate Queues",
-    "Holiday": "No",
+    "Simulation Mode": "Priority Queue",
+    "Holiday": "Yes",
     "Industry Employees": "50000",
     "High-Tech Employees": "50000",
     "Weather": "Sunny",

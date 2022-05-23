@@ -1,12 +1,15 @@
 from flask import Flask
 from backend.main_page import mainBP
 from backend.run_simulation import simulationBP
+from backend.remove_plots import removePlotsBP
+
 
 app = Flask(__name__)
 
 
 app.register_blueprint(mainBP, url_prefix="")
 app.register_blueprint(simulationBP, url_prefix="")
+app.register_blueprint(removePlotsBP, url_prefix="")
 app.secret_key = "sxchahsdiusd324wdasd"
 
 if __name__ == "__main__":
