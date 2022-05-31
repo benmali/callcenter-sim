@@ -5,7 +5,7 @@ import math
 
 
 class Metrics:
-    def __init__(self, metric_date: datetime.datetime):
+    def __init__(self, metric_date: datetime.datetime, mode, n_call_agents, n_chat_agents):
         self.metric_date = metric_date
         self.total_calls = 0
         self.total_chats = 0
@@ -26,6 +26,13 @@ class Metrics:
         self.call_abandonments = []
         self.chat_abandonments = []
         self.arrival_histogram = defaultdict(int)
+        self.mode = mode
+        self.n_call_agents = n_call_agents
+        self.n_chat_agents = n_chat_agents
+        self.wait_time_mapper = {8: 20, 9: 30, 10: 60, 11: 180, 12: 240, 13: 350, 14: 380, 15: 170, 16: 120, 17: 100,
+                                 18: 70, 19: 60, 20: 30, 21: 20, 22: 15, 23: 10}
+
+
 
     # Number of end employees ratio to agents
     # What is the number of agents needed to provide SLA when a new company of size X signs?
@@ -118,6 +125,8 @@ class Metrics:
     def get_client_calls(self):
         return [call for call in self.calls if call.client_type != 'Restaurant']
 
+
+
     def get_client_call_wait_histogram(self):
         """
         Get number of rest waiting specific time
@@ -129,6 +138,18 @@ class Metrics:
                 continue
             calls_hist[round(call.wait_time, 2)] += 1
         return calls_hist
+
+    def get_client_chat_wait_histogram(self):
+        """
+        Get number of rest waiting specific time
+        @return:
+        """
+        chat_hist = defaultdict(int)
+        for chat in self.chats:
+            if chat.wait_time < 0:
+                continue
+            chat_hist[round(chat.wait_time, 2)] += 1
+        return chat_hist
 
     def system_state_hist_calls(self):
         system_hist = {}
@@ -160,8 +181,9 @@ class Metrics:
             if len(people_in_system[index_counter: index_counter + group_len]) == 0:
                 hour_avgs.append(0)
             else:
-                hour_avgs.append(math.floor(sum(people_in_system[index_counter: index_counter + group_len]) / len(
-                    people_in_system[index_counter: index_counter + group_len])))
+                #hour_avgs.append(math.floor(sum(people_in_system[index_counter: index_counter + group_len]) / len(
+                    #people_in_system[index_counter: index_counter + group_len])))
+                hour_avgs.append(min(max(people_in_system[index_counter: index_counter + group_len]), self.n_call_agents))
             index_counter += group_len
         hour_names = [i for i in range(8, 9 + len(hour_avgs))]
         return hour_avgs, hour_names
@@ -191,8 +213,10 @@ class Metrics:
             if len(people_in_system[index_counter: index_counter + group_len]) == 0:
                 hour_avgs.append(0)
             else:
-                hour_avgs.append(math.floor(sum(people_in_system[index_counter: index_counter + group_len]) / len(
-                    people_in_system[index_counter: index_counter + group_len])))
+                # hour_avgs.append(math.floor(sum(people_in_system[index_counter: index_counter + group_len]) / len(
+                #     people_in_system[index_counter: index_counter + group_len])))
+                hour_avgs.append(
+                    min(max(people_in_system[index_counter: index_counter + group_len]), self.n_chat_agents * 3))
             index_counter += group_len
         hour_names = [i for i in range(8, 9 + len(hour_avgs))]
         return hour_avgs, hour_names
@@ -223,7 +247,6 @@ class Metrics:
             index_counter += group_len
         hour_names = [i for i in range(8, 9 + len(hour_avgs))]
         return hour_avgs, hour_names
-
 
     def n_calls_in_queue(self):
         call_queue = sorted(self.call_queue_events, key=lambda x: x[1])

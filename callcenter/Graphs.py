@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
-
+# plt.rcParams.update({'font.size': 6})
+plt.rc('xtick', labelsize=6)    # fontsize of the tick labels
 
 class Graphs:
     def __init__(self):
@@ -52,15 +53,27 @@ class Graphs:
         plt.show()
 
     @staticmethod
-    def plot_client_wait_histogram(wait_histogram):
+    def plot_call_wait_histogram(wait_histogram):
         fig, ax = plt.subplots(figsize=(7, 4))
-        ax.set_title('Wait time (minutes) vs Number of clients')
+        ax.set_title('Wait time (minutes) vs Number of calls')
         ax.set_xlabel('Wait time [Minutes]')
-        ax.set_ylabel('Number of clients')
+        ax.set_ylabel('Number of calls')
         ax.set_yticks(ticks=np.arange(0, 1000, 50))
         ax.hist(wait_histogram, bins=10)
         plt.bar(wait_histogram.keys(), wait_histogram.values(),  width=0.1)
-        plt.savefig('../flask/static/images/client_wait.png')
+        plt.savefig('../flask/static/images/call_wait.png')
+        plt.show()
+
+    @staticmethod
+    def plot_chat_wait_histogram(wait_histogram):
+        fig, ax = plt.subplots(figsize=(7, 4))
+        ax.set_title('Wait time (minutes) vs Number of chats')
+        ax.set_xlabel('Wait time [Minutes]')
+        ax.set_ylabel('Number of chats')
+        ax.set_yticks(ticks=np.arange(0, 1000, 50))
+        ax.hist(wait_histogram, bins=10)
+        plt.bar(wait_histogram.keys(), wait_histogram.values(),  width=0.1)
+        plt.savefig('../flask/static/images/chat_wait.png')
         plt.show()
 
     @staticmethod

@@ -1,16 +1,16 @@
 {
-    "Simulation Mode": "Priority Queue",
-    "Holiday": "Yes",
+    "Simulation Mode": "Regular",
+    "Holiday": "No",
     "Industry Employees": "50000",
     "High-Tech Employees": "50000",
     "Weather": "Sunny",
     "Rain Factor": "1.1",
-    "Chat Duration ~ E(X)": "5min",
+    "Chat Duration ~ E(X)": "9min",
     "Chat Variance ~ V(X)": "0.5min",
     "Call Duration ~ E(X)": "3min",
     "Call Variance ~ V(X)": "0.5min",
-    "Number of Call Agents": "6",
-    "Number of Chat Agents": "4",
-    "Client Patience ~ E(X)": "10",
+    "Number of Call Agents": "15",
+    "Number of Chat Agents": "10",
+    "Client Patience ~ E(X)": "5",
     "Client Patience ~ V(X)": "0.5"
 }

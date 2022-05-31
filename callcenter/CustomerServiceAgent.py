@@ -1,6 +1,5 @@
 from helpers import Probabilities
 import datetime
-from callcenter import Client
 
 
 class CustomerServiceAgent:
@@ -24,7 +23,7 @@ class CustomerServiceAgent:
         self.n_short_breaks = 0  # Allowed number of breaks is 3 breaks of up to 3 min
         self.n_long_breaks = 0  # Allowed number of breaks is 1 break of up to 10 min
         self.max_short_breaks = 3
-        self.max_long_breaks = 1
+        self.max_long_breaks = 10
         self.lunch_break = 0  # Allowed number of breaks is 1 break of up to 45 min
 
     def __repr__(self):
@@ -133,7 +132,7 @@ class CustomerServiceAgent:
                 self.n_long_breaks += 1
                 self.on_break = True
                 self.wants_break = False
-                break_time = 5.0 * 60  # Randomize this
+                break_time = 15.0 * 60  # Randomize this
                 self.is_free = False
                 return break_time  # return break time
 
@@ -148,7 +147,6 @@ class CustomerServiceAgent:
                 break_time = 2.0 * 60  # Randomize this
                 return break_time  # return break time
             return 0  # Agent wants a break, but exceeded the breaks limit
-
         return 0  # No break
 
         # set terms for breaks

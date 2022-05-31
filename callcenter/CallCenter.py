@@ -143,8 +143,9 @@ class CallCenter:
             if curr_client:
                 logger.info(f"{agent} answering {client.contact_method} at {self.curr_time}")
                 contact_duration = agent.handle_client(curr_client)
-                client.set_wait_time(self.curr_time)
-                client.set_service_time(contact_duration)  # Update call duration
+                client.update_metrics(self.curr_time, contact_duration, self.mode, self.n_call_agents)
+                # client.set_wait_time(self.curr_time)
+                # client.set_service_time(contact_duration)  # Update call duration
                 hpq.heappush(self.events,
                              callcenter.Event(self.curr_time + datetime.timedelta(seconds=contact_duration),
                                               'end_call_or_chat',
@@ -214,7 +215,7 @@ class CallCenter:
                 pulled_valid_client = True
                 logger.debug(f"{agent} {agent.task_assigned} pulled another client {self.curr_time}")
                 contact_duration = agent.handle_client(client)
-                client.update_metrics(self.curr_time, contact_duration)
+                client.update_metrics(self.curr_time, contact_duration, self.mode, self.n_call_agents)
                 hpq.heappush(self.events,
                              callcenter.Event(self.curr_time + datetime.timedelta(seconds=contact_duration),
                                               'end_call_or_chat',
@@ -254,7 +255,7 @@ class CallCenter:
                 continue
             contact_duration = agent.handle_client(client)
             logger.info(f"{agent} answering {client.contact_method} at {self.curr_time}")
-            client.update_metrics(self.curr_time, contact_duration)
+            client.update_metrics(self.curr_time, contact_duration, self.mode, self.n_call_agents)
             hpq.heappush(self.events,
                          callcenter.Event(self.curr_time + datetime.timedelta(seconds=contact_duration),
                                           'end_call_or_chat',
@@ -376,7 +377,7 @@ class CallCenter:
             np.random.seed(i + 1)
             # self.sign_new_company()
             client = callcenter.Client(self.curr_time)
-            self.day_metrics = Metrics(self.curr_time)
+            self.day_metrics = Metrics(self.curr_time, self.mode, self.n_call_agents, self.n_chat_agents)
             hpq.heappush(self.events, callcenter.Event(client.arrival_time, "incoming_call_or_chat", client))
             while self.curr_time.hour < self.closing_hour.hour:
                 event = hpq.heappop(self.events)
@@ -395,7 +396,8 @@ class CallCenter:
             Graphs.plot_chat_abandon_times(self.day_metrics.get_chat_abandonments())
             Graphs.plot_arrival_histogram(self.day_metrics.arrival_histogram)
             Graphs.plot_rest_wait_histogram(self.day_metrics.get_rest_wait_histogram())
-            Graphs.plot_client_wait_histogram(self.day_metrics.get_client_call_wait_histogram())
+            Graphs.plot_call_wait_histogram(self.day_metrics.get_client_call_wait_histogram())
+            Graphs.plot_chat_wait_histogram(self.day_metrics.get_client_chat_wait_histogram())
             Graphs.plot_queue_calls(*self.day_metrics.n_calls_in_queue())
             Graphs.plot_queue_chats(*self.day_metrics.n_chats_in_queue())
             Graphs.plot_system_hist_chats(*self.day_metrics.system_state_hist_chats())

@@ -40,6 +40,7 @@ class Client:
         self.max_wait_time = Probabilities.max_client_patience()
         call_probability = np.random.uniform(0, 1)
 
+
         if self.age > 35 and self.sector == 'Blue-Collar':  # Older employees tend to call
             if call_probability < 0.8:
                 self.contact_method = 'call'
@@ -64,8 +65,9 @@ class Client:
     def __repr__(self):
         return f"Client's Arrival: {self.arrival_time}, Method: {self.contact_method}, Reason: {self.contact_reason}"
 
-    def update_metrics(self, start_service_time: datetime.datetime, contact_duration):
-        self.set_wait_time(start_service_time)
+    def update_metrics(self, start_service_time: datetime.datetime, contact_duration, mode, n_agents):
+
+        self.set_wait_time(start_service_time, mode, n_agents)
         self.set_service_time(contact_duration)
 
     def abandon_queue(self):
@@ -87,7 +89,7 @@ class Client:
                                   False)
         return metric
 
-    def set_wait_time(self, start_service_time: datetime.datetime):
+    def set_wait_time(self, start_service_time: datetime.datetime, mode, n_agents):
         """
         Update client's total waiting time when he starts to get service
         @param start_service_time:
