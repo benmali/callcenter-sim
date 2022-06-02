@@ -26,16 +26,29 @@ class Metrics:
         self.call_abandonments = []
         self.chat_abandonments = []
         self.arrival_histogram = defaultdict(int)
+        self.call_abandon_prop = {'PriorityQueue': 0.10, 'Regular': 0.14}
+
         self.mode = mode
         self.n_call_agents = n_call_agents
         self.n_chat_agents = n_chat_agents
         self.wait_time_mapper = {8: 20, 9: 30, 10: 60, 11: 180, 12: 240, 13: 350, 14: 380, 15: 170, 16: 120, 17: 100,
                                  18: 70, 19: 60, 20: 30, 21: 20, 22: 15, 23: 10}
 
+    def call_abandon_hist(self) -> dict:
+        abandon_hist = {}
+        call_groups = [list(v) for i, v in groupby(sorted(self.calls + self.call_abandonments, key=lambda x: x.arrival_time.hour), lambda x: x.arrival_time.hour)]  # GroupBy first element.
+        for group in call_groups:
+            n_abandon = (self.call_abandon_prop.get(self.mode)) * len(group)  # number of abandonments per hour
+            abandon_hist[group[0].arrival_time.hour] = n_abandon
+        return abandon_hist
 
-
-    # Number of end employees ratio to agents
-    # What is the number of agents needed to provide SLA when a new company of size X signs?
+    def chat_abandon_hist(self) -> dict:
+        abandon_hist = {}
+        call_groups = [list(v) for i, v in groupby(sorted(self.chats + self.chat_abandonments, key=lambda x: x.arrival_time.hour), lambda x: x.arrival_time.hour)]  # GroupBy first element.
+        for group in call_groups:
+            n_abandon = 0.11 * len(group)  # number of abandonments per hour
+            abandon_hist[group[0].arrival_time.hour] = n_abandon
+        return abandon_hist
 
     def mark_call_or_chat_events(self, contact_method, time, action):
         """
@@ -124,7 +137,6 @@ class Metrics:
 
     def get_client_calls(self):
         return [call for call in self.calls if call.client_type != 'Restaurant']
-
 
 
     def get_client_call_wait_histogram(self):

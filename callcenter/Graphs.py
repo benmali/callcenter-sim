@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
-# plt.rcParams.update({'font.size': 6})
+
 plt.rc('xtick', labelsize=6)    # fontsize of the tick labels
 
 class Graphs:
