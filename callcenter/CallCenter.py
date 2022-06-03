@@ -40,6 +40,7 @@ class CallCenter:
         sim_mode = self.user_parameters.get("Simulation Mode")
         sim_map = {'Regular': 'Regular', "Separate Queues": "SeparatePool", "Priority Queue": "PriorityQueue"}
         self.mode = sim_map[sim_mode]  # PriorityQueue, SeparatePool, Regular
+        self.orig_mode = sim_map[sim_mode]
         # if self.mode == 'SeparatePool':
         #     self.mode = 'PriorityQueue'
         self.n_high_tech_employees = int(self.user_parameters.get("High-Tech Employees"))
@@ -377,7 +378,8 @@ class CallCenter:
             np.random.seed(i + 1)
             # self.sign_new_company()
             client = callcenter.Client(self.curr_time)
-            self.day_metrics = Metrics(self.curr_time, self.mode, self.n_call_agents, self.n_chat_agents)
+            self.day_metrics = Metrics(self.curr_time, self.orig_mode, self.n_call_agents, self.n_chat_agents,
+                                       self.n_high_tech_employees, self.n_industry_employees, self.weather)
             hpq.heappush(self.events, callcenter.Event(client.arrival_time, "incoming_call_or_chat", client))
             while self.curr_time.hour < self.closing_hour.hour:
                 event = hpq.heappop(self.events)
@@ -397,9 +399,13 @@ class CallCenter:
             Graphs.plot_chat_abandon_times(self.day_metrics.chat_abandon_hist())
             #Graphs.plot_chat_abandon_times(self.day_metrics.get_chat_abandonments())
             Graphs.plot_arrival_histogram(self.day_metrics.arrival_histogram)
-            Graphs.plot_rest_wait_histogram(self.day_metrics.get_rest_wait_histogram())
-            Graphs.plot_call_wait_histogram(self.day_metrics.get_client_call_wait_histogram())
-            Graphs.plot_chat_wait_histogram(self.day_metrics.get_client_chat_wait_histogram())
+
+            Graphs.plot_call_wait_histogram(self.day_metrics.wait_hist_calls())
+            Graphs.plot_chat_wait_histogram(self.day_metrics.wait_hist_chats())
+            Graphs.plot_rest_wait_histogram(self.day_metrics.wait_hist_rest())
+            #Graphs.plot_rest_wait_histogram(self.day_metrics.get_rest_wait_histogram())
+            #Graphs.plot_call_wait_histogram(self.day_metrics.get_client_call_wait_histogram())
+            #Graphs.plot_chat_wait_histogram(self.day_metrics.get_client_chat_wait_histogram())
             Graphs.plot_queue_calls(*self.day_metrics.n_calls_in_queue())
             Graphs.plot_queue_chats(*self.day_metrics.n_chats_in_queue())
             Graphs.plot_system_hist_chats(*self.day_metrics.system_state_hist_chats())

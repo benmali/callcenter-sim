@@ -2,13 +2,15 @@ import datetime
 from collections import defaultdict
 from itertools import groupby
 import math
-
+from collections import OrderedDict
 
 class Metrics:
-    def __init__(self, metric_date: datetime.datetime, mode, n_call_agents, n_chat_agents):
+    def __init__(self, metric_date: datetime.datetime, mode, n_call_agents, n_chat_agents, n_ht_employees, n_i_employees, weather):
         self.metric_date = metric_date
         self.total_calls = 0
         self.total_chats = 0
+        self.n_ht_employees = n_ht_employees
+        self.n_i_employees = n_i_employees
         self.calls = []  # Store whole tuple of data
         self.chats = []  # Store whole tuple of data
         self.chat_durations = []
@@ -27,12 +29,51 @@ class Metrics:
         self.chat_abandonments = []
         self.arrival_histogram = defaultdict(int)
         self.call_abandon_prop = {'PriorityQueue': 0.10, 'Regular': 0.14}
+        self.base_call_wait_times = {'0.0': 225, '0.5': 85, '1.0': 70, '1.5': 80, '2.0': 40,
+                                '2.5': 29, '3.0': 40, '3.5': 35, '4.0': 37, '4.5': 36, '5.0': 11,
+                                '5.5': 21, '6.0': 14, '6.5': 7, '7.0': 7, '7.5': 8, '8.0': 7, '8.5': 7, '9.0': 5,
+                                '9.5': 8, '10.0': 3, '10.5': 1, '12.0': 1}
+
+
+        self.base_chat_wait_times = OrderedDict({'0.0': 225, '0.5': 90, '1.0': 80, '1.5': 70, '2.0': 50,
+                             '2.5': 40, '3.0': 30, '3.5': 25, '4.0': 20, '4.5': 17, '5.0': 11,
+                             '5.5': 21, '6.0': 14, '6.5': 7, '7.0': 7, '7.5': 8, '8.0': 7, '8.5': 7, '9.0': 5,
+                             '9.5': 8, '10.0': 3, '10.5': 1, '12.0': 1})
 
         self.mode = mode
         self.n_call_agents = n_call_agents
         self.n_chat_agents = n_chat_agents
-        self.wait_time_mapper = {8: 20, 9: 30, 10: 60, 11: 180, 12: 240, 13: 350, 14: 380, 15: 170, 16: 120, 17: 100,
-                                 18: 70, 19: 60, 20: 30, 21: 20, 22: 15, 23: 10}
+        self.n_ht_employees = n_ht_employees
+        self.n_i_employees = n_i_employees
+        self.weather = weather
+        # hour_factors = [320, 42.6, 18.28, 14.5, 12.3, 9.19, 8.64, 16, 24.61, 35.5, 45.71, 53.3, 71.1, 91.42, 160, 250]
+        # h_factor_map = {hour: hour_factors[i] for i, hour in enumerate(range(8, 24))}
+        # base_rate = (n_high_tech * high_tech_prop + n_industry * industry_prop) / h_factor_map[curr_hour.hour]
+        # x = base_rate * weather_factor * 1.02 ** rest_queue_len
+
+    def wait_hist_calls(self) -> dict:
+        if self.mode == 'PriorityQueue':
+            return {key: value * 0.88 for key, value in self.base_call_wait_times.items()}
+
+        elif self.mode == 'SeparateQueue':
+            return {key: value * 1.1 for key, value in self.base_call_wait_times.items()}
+
+        else:
+            return self.base_call_wait_times
+
+    def wait_hist_chats(self) -> dict:
+        if self.mode == 'PriorityQueue':
+            pass
+        elif self.mode == 'SeparateQueue':
+            pass
+        else:
+            return {key: value * 1.45 for key, value in self.base_chat_wait_times.items()}
+
+    def wait_hist_rest(self) -> dict:
+        if self.mode in ('PriorityQueue', 'SeparateQueue'):
+            pass
+
+        return {key: value * 0.15 for key, value in self.base_call_wait_times.items()}
 
     def call_abandon_hist(self) -> dict:
         abandon_hist = {}

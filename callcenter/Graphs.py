@@ -46,9 +46,8 @@ class Graphs:
         ax.set_title('Wait time (minutes) vs Number of Restaurants')
         ax.set_xlabel('Wait time [Minutes]')
         ax.set_ylabel('Number of Restaurants')
-        ax.set_yticks(ticks=np.arange(0, 50, 5))
-        ax.hist(wait_histogram, bins=10)
-        plt.bar(wait_histogram.keys(), wait_histogram.values(),  width=0.1)
+        ax.set_yticks(ticks=np.arange(0, 100, 10))
+        plt.bar(wait_histogram.keys(), wait_histogram.values())
         plt.savefig('../flask/static/images/rest_wait.png')
         plt.show()
 
@@ -59,8 +58,7 @@ class Graphs:
         ax.set_xlabel('Wait time [Minutes]')
         ax.set_ylabel('Number of calls')
         ax.set_yticks(ticks=np.arange(0, 1000, 50))
-        ax.hist(wait_histogram, bins=10)
-        plt.bar(wait_histogram.keys(), wait_histogram.values(),  width=0.1)
+        plt.bar(wait_histogram.keys(), wait_histogram.values())
         plt.savefig('../flask/static/images/call_wait.png')
         plt.show()
 
@@ -71,8 +69,7 @@ class Graphs:
         ax.set_xlabel('Wait time [Minutes]')
         ax.set_ylabel('Number of chats')
         ax.set_yticks(ticks=np.arange(0, 1000, 50))
-        ax.hist(wait_histogram, bins=10)
-        plt.bar(wait_histogram.keys(), wait_histogram.values(),  width=0.1)
+        plt.bar(wait_histogram.keys(), wait_histogram.values())
         plt.savefig('../flask/static/images/chat_wait.png')
         plt.show()
 
