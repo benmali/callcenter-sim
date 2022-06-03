@@ -379,7 +379,7 @@ class CallCenter:
             # self.sign_new_company()
             client = callcenter.Client(self.curr_time)
             self.day_metrics = Metrics(self.curr_time, self.orig_mode, self.n_call_agents, self.n_chat_agents,
-                                       self.n_high_tech_employees, self.n_industry_employees, self.weather)
+                                       self.weather)
             hpq.heappush(self.events, callcenter.Event(client.arrival_time, "incoming_call_or_chat", client))
             while self.curr_time.hour < self.closing_hour.hour:
                 event = hpq.heappop(self.events)

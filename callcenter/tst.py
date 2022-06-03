@@ -15,13 +15,21 @@ base_calls = 1055
 base_chats = 1168
 n_call_agent = 15
 n_chat_agent = 15
-base_call_ratio = 70
-base_chat_ratio = 77
-call_ratio = base_calls / n_call_agent
-chat_ratio = base_chats / n_chat_agent
+base_call_ratio = base_calls / n_call_agent
+base_chat_ratio = base_chats / n_chat_agent
+n_actual_calls = 1067
+n_actual_call_agents = 14
+n_actual_chats = 1200
+n_actual_chat_agents = 14
+actual_call_ratio = n_actual_calls / n_actual_call_agents
+actual_chat_ratio = n_actual_chats / n_actual_chat_agents
 
+z = [0.1, -0.05, 0.1, 0.05]
+multi_call_weights = [x * (actual_call_ratio / base_call_ratio) for x in z]
+multi_chat_weights = [x * (actual_chat_ratio / base_call_ratio) for x in z]
 call_weights = [float(n_ppl) / sum(calls.values()) for n_ppl in calls.values() ]
 chat_weights = [float(n_ppl) / sum(chats.values()) for n_ppl in chats.values() ]
+
 drop_from_first = 0.2  # mulitpy 0.2 * weight of first
 base_rest = base_calls * 0.03
 

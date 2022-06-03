@@ -46,7 +46,7 @@ class Graphs:
         ax.set_title('Wait time (minutes) vs Number of Restaurants')
         ax.set_xlabel('Wait time [Minutes]')
         ax.set_ylabel('Number of Restaurants')
-        ax.set_yticks(ticks=np.arange(0, 100, 10))
+        ax.set_yticks(ticks=np.arange(0, 15, 1))
         plt.bar(wait_histogram.keys(), wait_histogram.values())
         plt.savefig('../flask/static/images/rest_wait.png')
         plt.show()

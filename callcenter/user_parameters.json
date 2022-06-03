@@ -1,5 +1,5 @@
 {
-    "Simulation Mode": "Regular",
+    "Simulation Mode": "Priority Queue",
     "Holiday": "No",
     "Industry Employees": "50000",
     "High-Tech Employees": "50000",
@@ -8,7 +8,7 @@
     "Chat Duration ~ E(X)": "9min",
     "Chat Variance ~ V(X)": "0.5min",
     "Call Duration ~ E(X)": "3min",
-    "Call Variance ~ V(X)": "1min",
+    "Call Variance ~ V(X)": "0.5min",
     "Number of Call Agents": "15",
     "Number of Chat Agents": "15",
     "Client Patience ~ E(X)": "3",
