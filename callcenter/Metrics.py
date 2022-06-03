@@ -26,7 +26,7 @@ class Metrics:
         self.call_abandonments = []
         self.chat_abandonments = []
         self.arrival_histogram = defaultdict(int)
-        self.call_abandon_prop = {'PriorityQueue': 0.10, 'Regular': 0.14}
+        self.call_abandon_prop = {'PriorityQueue': 0.10, 'Regular': 0.14, 'SeparatePool': 0.16}
         self.base_call_wait_times = {'0.0': 225, '0.5': 85, '1.0': 70, '1.5': 80, '2.0': 40,
                                 '2.5': 29, '3.0': 40, '3.5': 35, '4.0': 37, '4.5': 36, '5.0': 11,
                                 '5.5': 21, '6.0': 14, '6.5': 7, '7.0': 7, '7.5': 8, '8.0': 7, '8.5': 7, '9.0': 5,
@@ -48,9 +48,15 @@ class Metrics:
         self.base_call_ratio = self.base_calls / self.n_call_agents
         self.base_chat_ratio = self.base_chats / self.n_chat_agents
 
-        self.priority_weight_move_list = [-0.05, -0.02, 0.05, 0.02] + [0] * 21
-        self.separate_weight_move_list = [-0.12, -0.07, 0.12, 0.07] + [0] * 21
-        self.base_weight_move_list = [-0.15, -0.095, 0.15, 0.095] + [0] * 21
+        self.priority_weight_move_list = [0.02, 0.0036, 0, -0.02, -0.003, -0.002, -0.002, -0.002] + [0] * 17
+        self.separate_weight_move_list = [-0.14, -0.025, -0.01, -0.02, 0.02, 0.03, 0.03, 0.03, 0.02, 0.015, 0.015] + [0] * 14
+        self.rest_weight_move_list = [0.50, 0.30, -0.20, -0.20, -0.20, -0.20, -0.20, -0.05] + [-0.1] * 17
+        self.rest_wait_sep = [0.80, 0.20] + [0] * 23
+        self.rest_wait_priority = [0.75, 0.20, 0.05] + [0] * 22
+        self.base_weight_move_list = [-0.035, -0.01, 0, 0.0, 0.0125, 0.01, 0.01] + [0] * 19
+
+
+        self.base_chat_move_list = [-0.20, -0.03, -0.02, 0.0, 0.025, 0.025, 0.0325, 0.0325, 0.03, 0.03, 0.03, 0.03, 0.03, 0.02,0.01] + [0] * 10
         self.base_rest_wait_move_list = []
         self.base_call_weights = [x / sum(self.base_call_wait_times.values()) for x in self.base_call_wait_times.values()]
         self.base_chat_weights = [x / sum(self.base_chat_wait_times.values()) for x in self.base_chat_wait_times.values()]
@@ -58,59 +64,69 @@ class Metrics:
     def wait_hist_calls(self) -> dict:
         self.actual_call_ratio = len(self.calls) / self.n_call_agents
         if self.mode == 'PriorityQueue':
-            new_call_weights = [(x * (self.actual_call_ratio / self.base_call_ratio)) -  self.base_weight_move_list[i] for i, x in
-                                enumerate(self.priority_weight_move_list)]
-            moved_call_histogram = {key: (self.base_call_weights[i] + new_call_weights[i]) * len(self.calls) for
+            new_call_weights = [(x * (self.actual_call_ratio / self.base_call_ratio)) + self.priority_weight_move_list[i]
+                                for i, x in enumerate(self.base_call_weights)]
+            moved_call_histogram = {key: new_call_weights[i] * len(self.calls) for
                                     i, (key, call_per_bin) in enumerate(self.base_call_wait_times.items())}
 
         elif self.mode == 'SeparatePool':
-            new_call_weights = [(x * (self.actual_call_ratio / self.base_call_ratio)) -  self.base_weight_move_list[i] for i, x in
-                                enumerate(self.separate_weight_move_list)]
-            moved_call_histogram = {key: (self.base_call_weights[i] + new_call_weights[i]) * len(self.calls) for
+            new_call_weights = [(x * (self.actual_call_ratio / self.base_call_ratio)) + self.separate_weight_move_list[i] for i, x in
+                                enumerate(self.base_call_weights)]
+            moved_call_histogram = {key: new_call_weights[i] * len(self.calls) for
                                     i, (key, call_per_bin) in enumerate(self.base_call_wait_times.items())}
 
         else:
-            new_call_weights = [(x * (self.actual_call_ratio / self.base_call_ratio)) - self.base_weight_move_list[i] for i, x in
-                                enumerate(self.base_weight_move_list)]
-            moved_call_histogram = {key: (self.base_call_weights[i] + new_call_weights[i]) * len(self.calls) for
+            new_call_weights = [(x * (self.actual_call_ratio / self.base_call_ratio)) + self.base_weight_move_list[i] for i, x in
+                                enumerate(self.base_call_weights)]
+            moved_call_histogram = {key: (new_call_weights[i]) * len(self.calls) for
                                     i, (key, call_per_bin) in enumerate(self.base_call_wait_times.items())}
+        print("Call hist")
+        print(sum([float(key) * value for key, value in moved_call_histogram.items() ])/ sum(moved_call_histogram.values()))
         return moved_call_histogram
 
     def wait_hist_chats(self) -> dict:
         self.actual_chat_ratio = len(self.chats) / self.n_chat_agents
         if self.mode == 'PriorityQueue':
-            new_chat_weights = [x * (self.actual_chat_ratio / self.base_chat_ratio) - self.base_weight_move_list[i] for i, x in
-                                enumerate(self.priority_weight_move_list)]
-            moved_chat_histogram = {key: (self.base_chat_weights[i] + new_chat_weights[i]) * len(self.chats) for
+            new_chat_weights = [x * (self.actual_chat_ratio / self.base_chat_ratio) + self.priority_weight_move_list[i] for i, x in
+                                enumerate(self.base_chat_weights)]
+            moved_chat_histogram = {key: (new_chat_weights[i]) * len(self.chats) for
                                     i, (key, chat_per_bin) in enumerate(self.base_chat_wait_times.items())}
         elif self.mode == 'SeparatePool':
-            new_chat_weights = [x * (self.actual_chat_ratio / self.base_chat_ratio)  - self.base_weight_move_list[i] for i, x in
-                                enumerate(self.separate_weight_move_list)]
-            moved_chat_histogram = {key: (self.base_chat_weights[i] + new_chat_weights[i]) * len(self.chats) for
+            new_chat_weights = [x * (self.actual_chat_ratio / self.base_chat_ratio)  + self.separate_weight_move_list[i] for i, x in
+                                enumerate(self.base_chat_weights)]
+            moved_chat_histogram = {key: (new_chat_weights[i]) * len(self.chats) for
                                     i, (key, chat_per_bin) in enumerate(self.base_chat_wait_times.items())}
         else:
-            new_chat_weights = [x * (self.actual_chat_ratio / self.base_chat_ratio) - self.base_weight_move_list[i] for i, x in
-                                enumerate(self.base_weight_move_list)]
-            moved_chat_histogram = {key: (self.base_chat_weights[i] + new_chat_weights[i]) * len(self.chats) for
+            new_chat_weights = [x * (self.actual_chat_ratio / self.base_chat_ratio) + self.base_chat_move_list[i] for i, x in
+                                enumerate(self.base_chat_weights)]
+            moved_chat_histogram = {key: new_chat_weights[i] * len(self.chats) for
                                     i, (key, chat_per_bin) in enumerate(self.base_chat_wait_times.items())}
+        print("Chat hist")
+        print(sum([float(key) * value for key, value in moved_chat_histogram.items()]) / sum(moved_chat_histogram.values()))
         return moved_chat_histogram
 
     def wait_hist_rest(self) -> dict:
         self.actual_call_ratio = len(self.calls) / self.n_call_agents
-        if self.mode in ('PriorityQueue', 'SeparatePool'):
-            new_call_weights = [(x * (self.actual_call_ratio / self.base_call_ratio)) - self.base_weight_move_list[i] for i, x in
-                                enumerate(self.priority_weight_move_list)]
-            moved_call_histogram = {key: (self.base_call_weights[i] + new_call_weights[i]) * len(self.calls) * 0.03 for
-                                    i, (key, call_per_bin) in enumerate(self.base_call_wait_times.items())}
+        if self.mode == 'PriorityQueue':
+            moved_call_histogram = {key: self.rest_wait_priority[i] * len(self.calls) * 0.03
+                                    for i, (key, call_per_bin) in enumerate(self.base_call_wait_times.items())}
+
+        elif self.mode == 'SeparatePool':
+            moved_call_histogram = {key: self.rest_wait_sep[i] * len(self.calls) * 0.03
+                                    for i, (key, call_per_bin) in enumerate(self.base_call_wait_times.items())}
+
         else:
             new_call_weights = [(x * (self.actual_call_ratio / self.base_call_ratio)) - self.base_weight_move_list[i] for i, x in
                                 enumerate(self.base_weight_move_list)]
-            moved_call_histogram = {key: (self.base_call_weights[i] + new_call_weights[i]) * len(self.calls) * 0.03 for
-                                    i, (key, call_per_bin) in enumerate(self.base_call_wait_times.items())}
+            moved_call_histogram = {key: (self.base_call_weights[i] + new_call_weights[i]) * len(self.calls) * 0.03 if (self.base_call_weights[i] + new_call_weights[i]) > 0 else 0
+                                    for i, (key, call_per_bin) in enumerate(self.base_call_wait_times.items())}
+        print("Rest hist")
+        print(sum([float(key) * value for key, value in moved_call_histogram.items()]) / sum(moved_call_histogram.values()))
         return moved_call_histogram
 
     def call_abandon_hist(self) -> dict:
         abandon_hist = {}
+
         call_groups = [list(v) for i, v in groupby(sorted(self.calls + self.call_abandonments, key=lambda x: x.arrival_time.hour), lambda x: x.arrival_time.hour)]  # GroupBy first element.
         for group in call_groups:
             n_abandon = (self.call_abandon_prop.get(self.mode)) * len(group)  # number of abandonments per hour
